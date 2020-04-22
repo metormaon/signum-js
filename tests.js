@@ -1,5 +1,3 @@
-import Jasmine from 'jasmine'
-
 describe("A suite is just a function", function() {
   var a;
 
