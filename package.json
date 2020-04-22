@@ -1,7 +1,9 @@
 {
   "name": "signum-js",
   "version": "1.0.0",
-  "dependencies": {},
+  "dependencies": {
+    "jasmine": "^3.5.0"
+  },
   "scripts": {
     "test": "jasmine tests.js"
   }
