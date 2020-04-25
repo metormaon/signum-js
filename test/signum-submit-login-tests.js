@@ -1,55 +1,55 @@
 const {Signum} = require('../src/signum.js');
 
-describe("submitLogin", function() {
-    it("should fail without username", async function() {
+describe("ubmitLogin", function() {
+    it("should fail without username", async function () {
         await expectAsync(
             Signum.executeLogin()
         ).toBeRejectedWithError("Username is null or empty");
     });
 
-    it("should fail with empty username", async function() {
+    it("should fail with empty username", async function () {
         await expectAsync(
             Signum.executeLogin("")
         ).toBeRejectedWithError("Username is null or empty");
     });
 
-    it("should fail without passtext", async function() {
+    it("should fail without passtext", async function () {
         await expectAsync(
             Signum.executeLogin("joe")
         ).toBeRejectedWithError("Passtext is null or empty");
     });
 
-    it("should fail with empty passtext", async function() {
+    it("should fail with empty passtext", async function () {
         await expectAsync(
             Signum.executeLogin("joe", "")
         ).toBeRejectedWithError("Passtext is null or empty");
     });
 
-    it("should fail without loginUrl", async function() {
+    it("should fail without loginUrl", async function () {
         await expectAsync(
             Signum.executeLogin("joe", "sdf57fs7")
         ).toBeRejectedWithError("loginUrl is null or empty");
     });
 
-    it("should fail with empty loginUrl", async function() {
+    it("should fail with empty loginUrl", async function () {
         await expectAsync(
             Signum.executeLogin("joe", "sdf57fs7", "")
         ).toBeRejectedWithError("loginUrl is null or empty");
     });
 
-    it("should fail with bad loginUrl", async function() {
+    it("should fail with bad loginUrl", async function () {
         await expectAsync(
             Signum.executeLogin("joe", "sdf57fs7", "zubzubzubzub")
         ).toBeRejectedWithError("Bad loginUrl: zubzubzubzub [\"is not a valid url\"]");
     });
 
-    it("should fail without serverInstructions", async function() {
+    it("should fail without serverInstructions", async function () {
         await expectAsync(
             Signum.executeLogin("joe", "sdf57fs7", "http://localhost")
         ).toBeRejectedWithError("serverInstructions is null or empty");
     });
 
-    it("should fail with missing hashcash policy", async function() {
+    it("should fail with missing hashcash policy", async function () {
         const serverInstructions = {
             hashcash: {
                 require: true
@@ -57,13 +57,13 @@ describe("submitLogin", function() {
         };
 
         await expectAsync(
-            Signum.executeLogin("joe", "sdf57fs7", "http://localhost", serverInstructions,
-                "referer", "state")
+            Signum.executeLogin("joe", "sdf57fs7", "http://localhost",
+                serverInstructions, "referer", "state")
         ).toBeRejectedWithError("Bad serverInstructions: [\"Hashcash zero count can't be blank\"," +
             "\"Hashcash server string can't be blank\"]");
     });
 
-    const scenarios =  [
+    const scenarios = [
         {value: "Josh", error: "is not a number"},
         {value: 1.2, error: "must be an integer"},
         {value: -1, error: "must be greater than 0"},
@@ -83,13 +83,13 @@ describe("submitLogin", function() {
             };
 
             await expectAsync(
-                Signum.executeLogin("joe", "sdf57fs7", "http://localhost", serverInstructions,
-                "referer", "state")
+                Signum.executeLogin("joe", "sdf57fs7", "http://localhost",
+                    serverInstructions, "referer", "state")
             ).toBeRejectedWithError(`Bad serverInstructions: [\"Hashcash zero count ${error}\"]`);
         });
     }
 
-    it("should fail if server string is required but not provided", async function() {
+    it("should fail if server string is required but not provided", async function () {
         const serverInstructions = {
             hashcash: {
                 require: true,
@@ -98,12 +98,12 @@ describe("submitLogin", function() {
         };
 
         await expectAsync(
-            Signum.executeLogin("joe", "sdf57fs7", "http://localhost", serverInstructions,
-                "referer", "state")
+            Signum.executeLogin("joe", "sdf57fs7", "http://localhost",
+                serverInstructions, "referer", "state")
         ).toBeRejectedWithError("Bad serverInstructions: [\"Hashcash server string can't be blank\"]");
     });
 
-    it("should fail if zero count is required but not provided", async function() {
+    it("should fail if zero count is required but not provided", async function () {
         const serverInstructions = {
             hashcash: {
                 require: true,
@@ -112,23 +112,23 @@ describe("submitLogin", function() {
         };
 
         await expectAsync(
-            Signum.executeLogin("joe", "sdf57fs7", "http://localhost", serverInstructions,
-                "referer", "state")
+            Signum.executeLogin("joe", "sdf57fs7", "http://localhost",
+                serverInstructions, "referer", "state")
         ).toBeRejectedWithError("Bad serverInstructions: [\"Hashcash zero count can't be blank\"]");
     });
 
-    it("should fail if csrf token is mentioned but require is not specified", async function() {
+    it("should fail if csrf token is mentioned but require is not specified", async function () {
         const serverInstructions = {
             csrfToken: {}
         };
 
         await expectAsync(
-            Signum.executeLogin("joe", "sdf57fs7", "http://localhost", serverInstructions,
-                "referer", "state")
+            Signum.executeLogin("joe", "sdf57fs7", "http://localhost",
+                serverInstructions, "referer", "state")
         ).toBeRejectedWithError("Bad serverInstructions: [\"Csrf token require can't be blank\"]");
     });
 
-    it("should fail if csrf token is required but not provided", async function() {
+    it("should fail if csrf token is required but not provided", async function () {
         const serverInstructions = {
             csrfToken: {
                 require: true
@@ -136,56 +136,78 @@ describe("submitLogin", function() {
         };
 
         await expectAsync(
-            Signum.executeLogin("joe", "sdf57fs7", "http://localhost", serverInstructions,
-                "referer", "state")
+            Signum.executeLogin("joe", "sdf57fs7", "http://localhost",
+                serverInstructions, "referer", "state")
         ).toBeRejectedWithError("csrfToken is null or empty");
     });
 
-    xit("should fail if hashcash is required but is empty", async function() {
+    async function loginMock(_, request) {
+        return request;
+    }
+
+    const requestBase = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json;charset=utf-8',
+            'X-Username': "joe",
+            'X-hashed-Passtext': "sdf57fs7"
+        },
+        body: "state",
+        referrer: "referer"
+    };
+
+    it("should login right without additional policies", async function() {
+        const serverInstructions = {};
+
+        await expectAsync(
+            Signum.executeLogin("joe", "sdf57fs7", "http://localhost",
+                serverInstructions, "referer", "state", "", loginMock)
+        ).toBeResolvedTo(requestBase);
+    });
+
+    it("should login right with hashcash", async function() {
         const serverInstructions = {
             hashcash: {
                 require: true,
-                zeroCount: 4,
+                zeroCount: 1,
                 serverString: "hello world"
             }
         };
 
-        await expectAsync(
-            Signum.executeLogin("joe", "sdf57fs7", "http://localhost", serverInstructions,
-                "referer", "state", "hey jude")
-        ).toBeRejectedWithError("Bad hashcash for policy {\"require\":true,\"zeroCount\":4}: hey jude");
+        let request = await Signum.executeLogin("joe", "sdf57fs7", "http://localhost",
+                serverInstructions, "referer", "state", "", loginMock);
+
+        expect(request.headers["X-Hashcash"]).toMatch(
+            /^1:[0-9]{8}-[0-9]{6}:[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}:hello world:[^:]+:[^:]+$/);
+
+        delete request.headers["X-Hashcash"];
+
+        expect(request).toEqual(requestBase);
     });
 
-    xit("zzzzzzzzzzzz", async function() {
+    it("should login right with hashcash and csrf token", async function() {
         const serverInstructions = {
-            csrfToken: {
-                require: true
+            hashcash: {
+                require: true,
+                zeroCount: 1,
+                serverString: "hello world"
             },
-            hashcash: {
-                require: true,
-                zeroCount: 4,
-                serverString: "hello world"
-            }
-        };
-
-        await expectAsync(
-            Signum.executeLogin("joe", "sdf57fs7", "http://localhost", serverInstructions,
-                "referer", "state", "AE546B2FF")
-        ).toBeRejectedWithError("Bad serverInstructions: [\"Hashcash can't be blank\",\"Hashcash require can't be blank\"]");
-    });
-
-    xit("should fail with missing hashcash zero count", async function() {
-        const serverInstructions = {
-            hashcash: {
+             csrfToken: {
                 require: true
             }
         };
 
-        await expectAsync(
-            Signum.executeLogin("joe", "sdf57fs7", "http://localhost", serverInstructions,
-                "referer", "state")
-        ).toBeRejectedWithError("Bad serverInstructions: [\"Hashcash zero count can't be blank\",\"Hashcash server string can't be blank\"]");
+        let request = await Signum.executeLogin("joe", "sdf57fs7", "http://localhost",
+                serverInstructions, "referer", "state", "df73dfFad54S", loginMock);
+
+        expect(request.headers["X-Hashcash"]).toMatch(
+            /^1:[0-9]{8}-[0-9]{6}:[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}:hello world:[^:]+:[^:]+$/);
+
+        delete request.headers["X-Hashcash"];
+
+        let requestBasePluCsrf = Object.assign({}, requestBase);
+        requestBasePluCsrf.headers["X-Csrf-Token"] = "df73dfFad54S";
+
+        expect(request).toEqual(requestBasePluCsrf);
     });
-
-
 });

@@ -105,7 +105,7 @@ The response may be a proof of work request, or the actual login.
         };
 
         if (serverInstructions.hashcash && serverInstructions.hashcash.require) {
-            headers['X-Hashcash'] = generateHashCash(serverInstructions.hashcash.zeroCount,
+            headers['X-Hashcash'] = await generateHashCash(serverInstructions.hashcash.zeroCount,
                 serverInstructions.hashcash.serverString);
         }
 

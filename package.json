@@ -1,6 +1,12 @@
 {
   "name": "signum-js",
   "version": "1.0.0",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/metormaon/signum-js"
+  },
+  "license": "MIT",
+  "description": "The client-side of the Signum sign-in tools project",
   "dependencies": {
     "btoa": "^1.2.1",
     "cross-fetch": "^3.0.4",
