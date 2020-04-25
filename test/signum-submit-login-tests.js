@@ -1,6 +1,6 @@
 const {Signum} = require('../src/signum.js');
 
-describe("ubmitLogin", function() {
+describe("submitLogin", function() {
     it("should fail without username", async function () {
         await expectAsync(
             Signum.executeLogin()
@@ -205,7 +205,7 @@ describe("ubmitLogin", function() {
 
         delete request.headers["X-Hashcash"];
 
-        let requestBasePluCsrf = Object.assign({}, requestBase);
+        let requestBasePluCsrf = JSON.parse(JSON.stringify(requestBase));
         requestBasePluCsrf.headers["X-Csrf-Token"] = "df73dfFad54S";
 
         expect(request).toEqual(requestBasePluCsrf);
