@@ -1,89 +1,66 @@
 const {Signum} = require('../src/signum.js');
 
 describe("submitLogin", function() {
-    it("should fail without username", function() {
-        expect(() =>
+    it("should fail without username", async function() {
+        await expectAsync(
             Signum.executeLogin()
-        ).toThrowError("Username is null or empty");
+        ).toBeRejectedWithError("Username is null or empty");
     });
 
-    it("should fail with empty username", function() {
-        expect(() =>
+    it("should fail with empty username", async function() {
+        await expectAsync(
             Signum.executeLogin("")
-        ).toThrowError("Username is null or empty");
+        ).toBeRejectedWithError("Username is null or empty");
     });
 
-    it("should fail without passtext", function() {
-        expect(() =>
+    it("should fail without passtext", async function() {
+        await expectAsync(
             Signum.executeLogin("joe")
-        ).toThrowError("Passtext is null or empty");
+        ).toBeRejectedWithError("Passtext is null or empty");
     });
 
-    it("should fail with empty passtext", function() {
-        expect(() =>
+    it("should fail with empty passtext", async function() {
+        await expectAsync(
             Signum.executeLogin("joe", "")
-        ).toThrowError("Passtext is null or empty");
+        ).toBeRejectedWithError("Passtext is null or empty");
     });
 
-    it("should fail without loginUrl", function() {
-        expect(() =>
+    it("should fail without loginUrl", async function() {
+        await expectAsync(
             Signum.executeLogin("joe", "sdf57fs7")
-        ).toThrowError("loginUrl is null or empty");
+        ).toBeRejectedWithError("loginUrl is null or empty");
     });
 
-    it("should fail with empty loginUrl", function() {
-        expect(() =>
+    it("should fail with empty loginUrl", async function() {
+        await expectAsync(
             Signum.executeLogin("joe", "sdf57fs7", "")
-        ).toThrowError("loginUrl is null or empty");
+        ).toBeRejectedWithError("loginUrl is null or empty");
     });
 
-    it("should fail without serverInstructions", function() {
-        expect(() =>
-            Signum.executeLogin("joe", "sdf57fs7", "localhost")
-        ).toThrowError("serverInstructions is null or empty");
+    it("should fail with bad loginUrl", async function() {
+        await expectAsync(
+            Signum.executeLogin("joe", "sdf57fs7", "zubzubzubzub")
+        ).toBeRejectedWithError("Bad loginUrl: zubzubzubzub [\"is not a valid url\"]");
     });
 
-    it("should fail with missing hashcash policy", function() {
+    it("should fail without serverInstructions", async function() {
+        await expectAsync(
+            Signum.executeLogin("joe", "sdf57fs7", "http://localhost")
+        ).toBeRejectedWithError("serverInstructions is null or empty");
+    });
+
+    it("should fail with missing hashcash policy", async function() {
         const serverInstructions = {
             hashcash: {
                 require: true
             }
         };
 
-        expect(() =>
-            Signum.executeLogin("joe", "sdf57fs7", "localhost", serverInstructions)
-        ).toThrowError("Bad serverInstructions: [\"Hashcash zero count can't be blank\"," +
+        await expectAsync(
+            Signum.executeLogin("joe", "sdf57fs7", "http://localhost", serverInstructions,
+                "referer", "state")
+        ).toBeRejectedWithError("Bad serverInstructions: [\"Hashcash zero count can't be blank\"," +
             "\"Hashcash server string can't be blank\"]");
-    });
-
-    it("should fail with missing hashcash policy", function() {
-        const serverInstructions = {};
-
-        expect(() =>
-            Signum.executeLogin("joe", "sdf57fs7", "localhost", serverInstructions)
-        ).toThrowError("Bad serverInstructions: [\"Hashcash can't be blank\",\"Hashcash require can't be blank\"]");
-    });
-
-    it("should fail with missing hashcash require", function() {
-        const serverInstructions = {
-            hashcash: {}
-        };
-
-        expect(() =>
-            Signum.executeLogin("joe", "sdf57fs7", "localhost", serverInstructions)
-        ).toThrowError("Bad serverInstructions: [\"Hashcash require can't be blank\"]");
-    });
-
-    it("should fail with missing hashcash zero count", function() {
-        const serverInstructions = {
-            hashcash: {
-                require: true
-            }
-        };
-
-        expect(() =>
-            Signum.executeLogin("joe", "sdf57fs7", "localhost", serverInstructions)
-        ).toThrowError("Bad serverInstructions: [\"Hashcash zero count can't be blank\",\"Hashcash server string can't be blank\"]");
     });
 
     const scenarios =  [
@@ -95,7 +72,7 @@ describe("submitLogin", function() {
     ];
 
     for (const {value, error} of scenarios) {
-        it(`should fail because zeroCount ${error}`, function () {
+        it(`should fail because zeroCount ${error}`, async function () {
 
             const serverInstructions = {
                 hashcash: {
@@ -105,13 +82,14 @@ describe("submitLogin", function() {
                 }
             };
 
-            expect(() =>
-                Signum.executeLogin("joe", "sdf57fs7", "localhost", serverInstructions)
-            ).toThrowError(`Bad serverInstructions: [\"Hashcash zero count ${error}\"]`);
+            await expectAsync(
+                Signum.executeLogin("joe", "sdf57fs7", "http://localhost", serverInstructions,
+                "referer", "state")
+            ).toBeRejectedWithError(`Bad serverInstructions: [\"Hashcash zero count ${error}\"]`);
         });
     }
 
-    it("should fail if server string is required but not provided", function() {
+    it("should fail if server string is required but not provided", async function() {
         const serverInstructions = {
             hashcash: {
                 require: true,
@@ -119,12 +97,13 @@ describe("submitLogin", function() {
             }
         };
 
-        expect(() =>
-            Signum.executeLogin("joe", "sdf57fs7", "localhost", serverInstructions)
-        ).toThrowError("Bad serverInstructions: [\"Hashcash server string can't be blank\"]");
+        await expectAsync(
+            Signum.executeLogin("joe", "sdf57fs7", "http://localhost", serverInstructions,
+                "referer", "state")
+        ).toBeRejectedWithError("Bad serverInstructions: [\"Hashcash server string can't be blank\"]");
     });
 
-    it("should fail if zero count is required but not provided", function() {
+    it("should fail if zero count is required but not provided", async function() {
         const serverInstructions = {
             hashcash: {
                 require: true,
@@ -132,12 +111,37 @@ describe("submitLogin", function() {
             }
         };
 
-        expect(() =>
-            Signum.executeLogin("joe", "sdf57fs7", "localhost", serverInstructions)
-        ).toThrowError("Bad serverInstructions: [\"Hashcash zero count can't be blank\"]");
+        await expectAsync(
+            Signum.executeLogin("joe", "sdf57fs7", "http://localhost", serverInstructions,
+                "referer", "state")
+        ).toBeRejectedWithError("Bad serverInstructions: [\"Hashcash zero count can't be blank\"]");
     });
 
-    it("should fail if hashcash is required but is empty", function() {
+    it("should fail if csrf token is mentioned but require is not specified", async function() {
+        const serverInstructions = {
+            csrfToken: {}
+        };
+
+        await expectAsync(
+            Signum.executeLogin("joe", "sdf57fs7", "http://localhost", serverInstructions,
+                "referer", "state")
+        ).toBeRejectedWithError("Bad serverInstructions: [\"Csrf token require can't be blank\"]");
+    });
+
+    it("should fail if csrf token is required but not provided", async function() {
+        const serverInstructions = {
+            csrfToken: {
+                require: true
+            }
+        };
+
+        await expectAsync(
+            Signum.executeLogin("joe", "sdf57fs7", "http://localhost", serverInstructions,
+                "referer", "state")
+        ).toBeRejectedWithError("csrfToken is null or empty");
+    });
+
+    xit("should fail if hashcash is required but is empty", async function() {
         const serverInstructions = {
             hashcash: {
                 require: true,
@@ -146,34 +150,42 @@ describe("submitLogin", function() {
             }
         };
 
-        expect(() =>
-            Signum.executeLogin("joe", "sdf57fs7", "localhost", serverInstructions,
-                "hey jude")
-        ).toThrowError("Bad hashcash for policy {\"require\":true,\"zeroCount\":4}: hey jude");
+        await expectAsync(
+            Signum.executeLogin("joe", "sdf57fs7", "http://localhost", serverInstructions,
+                "referer", "state", "hey jude")
+        ).toBeRejectedWithError("Bad hashcash for policy {\"require\":true,\"zeroCount\":4}: hey jude");
     });
 
-
-
-
-
-
-    xit("should fail with missing hashcash policy", function() {
+    xit("zzzzzzzzzzzz", async function() {
         const serverInstructions = {
+            csrfToken: {
+                require: true
+            },
             hashcash: {
-                require: false
+                require: true,
+                zeroCount: 4,
+                serverString: "hello world"
             }
         };
 
-        expect(() =>
-            Signum.executeLogin("joe", "sdf57fs7", "localhost", serverInstructions)
-        ).toBe(true); //TODO
+        await expectAsync(
+            Signum.executeLogin("joe", "sdf57fs7", "http://localhost", serverInstructions,
+                "referer", "state", "AE546B2FF")
+        ).toBeRejectedWithError("Bad serverInstructions: [\"Hashcash can't be blank\",\"Hashcash require can't be blank\"]");
     });
 
+    xit("should fail with missing hashcash zero count", async function() {
+        const serverInstructions = {
+            hashcash: {
+                require: true
+            }
+        };
 
-  // it("should fail with bad loginUrl", function() {
-  //   expect(() =>
-  //       Signum.executeLogin("joe", "sdf57fs7", "login")
-  //   ).toThrowError("Invalid URL: ::");
-  // });
+        await expectAsync(
+            Signum.executeLogin("joe", "sdf57fs7", "http://localhost", serverInstructions,
+                "referer", "state")
+        ).toBeRejectedWithError("Bad serverInstructions: [\"Hashcash zero count can't be blank\",\"Hashcash server string can't be blank\"]");
+    });
+
 
 });

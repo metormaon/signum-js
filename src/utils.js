@@ -16,6 +16,19 @@ async function getPublicIp() {
     });
 }
 
+async function loginFetch(loginUrl, details) {
+    return new Promise((resolve, reject)=>{
+        fetch(loginUrl, details)
+        .then((response) => {
+            if (response.ok) {
+                resolve(response.json());
+            } else {
+                reject('Failed to fetch login');
+            }
+        });
+    });
+}
+
 function btoa(input) {
     return Buffer.from(input).toString('base64');
 }
@@ -57,3 +70,4 @@ async function generateHashCash(zeroCount, serverString) {
 
 exports.generateHashCash = generateHashCash;
 exports.getPublicIp = getPublicIp;
+exports.loginFetch = loginFetch;
