@@ -1,10 +1,21 @@
 {
   "name": "signum-js",
   "version": "1.0.0",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/metormaon/signum-js"
+  },
+  "license": "MIT",
+  "description": "The client-side of the Signum sign-in tools project",
   "dependencies": {
-    "jasmine": "^3.5.0"
+    "btoa": "^1.2.1",
+    "cross-fetch": "^3.0.4",
+    "dateformat": "^3.0.3",
+    "hex-to-binary": "^1.0.1",
+    "jasmine": "^3.5.0",
+    "validate.js": "^0.13.1"
   },
   "scripts": {
-    "test": "jasmine tests.js"
+    "test": "jasmine test/*-tests.js"
   }
 }
