@@ -1,5 +1,8 @@
 const validate = require("validate.js");
+const  { PasswordTolerance } = require("./passwordTolerance");
 const {loginFetch, generateHashCash} = require("./utils");
+const {loginConstraints, passwordToleranConstraints} = require("./serverInstructions");
+
 
 class Signum {
     /*
@@ -19,42 +22,6 @@ The response may be a proof of work request, or the actual login.
 
 
      */
-
-    static constraints = {
-        hashcash: {
-            presence: false
-        },
-        "hashcash.require": {
-            presence: function(value, attribute){
-              return attribute && attribute.hashcash;
-            },
-            type: "boolean"
-        },
-        "hashcash.zeroCount": {
-            presence: function(value, attribute){
-              return attribute && attribute.hashcash && attribute.hashcash.require;
-            },
-            numericality: {
-                onlyInteger: true,
-                greaterThan: 0,
-                lessThanOrEqualTo: 10
-            }
-        },
-        "hashcash.serverString": {
-            presence: function(value, attribute){
-              return attribute && attribute.hashcash && attribute.hashcash.require;
-            }
-        },
-        csrfToken: {
-            presence: false
-        },
-        "csrfToken.require": {
-            presence: function(value, attribute){
-              return attribute && attribute.csrfToken;
-            },
-            type: "boolean"
-        }
-    };
 
     static async executeLogin(username, hashedPasstext, loginUrl, serverInstructions, referer, state, csrfToken = "",
                               loginFunction = loginFetch) {
@@ -90,7 +57,7 @@ The response may be a proof of work request, or the actual login.
             throw new Error("state is null or empty");
         }
 
-        const invalidServerInstructions = validate(serverInstructions, Signum.constraints, {format: "flat"});
+        const invalidServerInstructions = validate(serverInstructions, loginConstraints, {format: "flat"});
 
         if (invalidServerInstructions) {
             throw new Error(
@@ -123,6 +90,30 @@ The response may be a proof of work request, or the actual login.
             body: state,
             referrer: referer
         });
+    }
+
+      static normalizePassphrase(passphrase, serverInstructions) {
+        if (!passphrase) {
+            throw new Error("Passphrase is null or empty");
+        }
+
+        if (!serverInstructions) {
+            throw new Error("serverInstructions is null or empty");
+        }
+
+        const invalidServerInstructions = validate(serverInstructions, passwordToleranConstraints, {format: "flat"});
+
+        if (invalidServerInstructions) {
+            throw new Error(
+                `Bad serverInstructions: ${JSON.stringify(invalidServerInstructions)}`
+            );
+        }
+
+        if(serverInstructions.normalizers && passphrase.length >= serverInstructions.minimalLength) {
+            passphrase = new PasswordTolerance(passphrase, serverInstructions.normalizers).normalize();
+        }
+
+        return passphrase;
     }
 }
 
