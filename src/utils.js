@@ -4,28 +4,41 @@ const dateFormat = require("dateformat");
 const hexToBinary = require('hex-to-binary');
 
 async function getPublicIp() {
-    return new Promise((resolve, reject)=>{
+    return new Promise((resolve, reject) => {
         fetch("https://api.ipify.org")
-        .then((response) => {
-            if (response.ok) {
-                resolve(response.text());
-            } else {
-                reject('Failed to fetch ip address');
-            }
-        });
+            .then((response) => {
+                if (response.ok) {
+                    resolve(response.text());
+                } else {
+                    reject('Failed to fetch ip address');
+                }
+            });
     });
 }
 
 async function loginFetch(loginUrl, details) {
-    return new Promise((resolve, reject)=>{
+    return new Promise((resolve, reject) => {
         fetch(loginUrl, details)
-        .then((response) => {
-            if (response.ok) {
-                resolve(response.json());
-            } else {
-                reject('Failed to fetch login');
-            }
-        });
+            .then((response) => {
+                if (response.ok) {
+                    resolve(response.json());
+                } else {
+                    reject('Failed to fetch login');
+                }
+            });
+    });
+}
+
+async function pdkf2(password, salt, iterations, keylen) {
+    return new Promise((resolve, reject) => {
+        crypto.pbkdf2(
+            password,
+            salt,
+            iterations,
+            keylen,
+            'sha512',
+            (err, derivedKey) => (err ? reject(err) : resolve(derivedKey.toString('hex')))
+        );
     });
 }
 
@@ -46,7 +59,7 @@ async function generateHashCash(zeroCount, serverString) {
         const randomString = btoa((Math.floor(Math.random() * Number.MAX_VALUE) + 1).toString());
         let counter = 0;
 
-        while (counter <  Number.MAX_VALUE - 1) {
+        while (counter < Number.MAX_VALUE - 1) {
             header = `${zeroCount}:${timestamp}:${ipAddress}:${serverString}:${randomString}:${btoa(counter.toString())}`;
 
             const hexHash = crypto.createHash('sha1').update(header).digest('hex').toString();
@@ -71,3 +84,4 @@ async function generateHashCash(zeroCount, serverString) {
 exports.generateHashCash = generateHashCash;
 exports.getPublicIp = getPublicIp;
 exports.loginFetch = loginFetch;
+exports.pdkf2 = pdkf2;

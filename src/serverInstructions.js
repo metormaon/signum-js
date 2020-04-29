@@ -35,7 +35,7 @@ const loginConstraints = {
 };
 
 
-const passwordToleranConstraints = {
+const passwordToleranceConstraints = {
     normalizers: {
         presence: false
     },
@@ -65,8 +65,28 @@ const passwordToleranConstraints = {
             onlyInteger: true,
             greaterThanOrEqualTo: 20
         }
-    },
+    }
 };
 
+
+const passwordHashingConstraints = {
+    hashCycles: {
+        presence: true,
+        numericality: {
+            onlyInteger: true,
+            greaterThanOrEqualTo: 1
+        }
+    },
+    resultLength: {
+        presence: true,
+        numericality: {
+            onlyInteger: true,
+            greaterThanOrEqualTo: 20
+        }
+    }
+};
+
+
 exports.loginConstraints = loginConstraints;
-exports.passwordToleranConstraints = passwordToleranConstraints;
+exports.passwordToleranceConstraints = passwordToleranceConstraints;
+exports.passwordHashingConstraints = passwordHashingConstraints;

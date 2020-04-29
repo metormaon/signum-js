@@ -1,7 +1,7 @@
 const validate = require("validate.js");
-const  { PasswordTolerance } = require("./passwordTolerance");
-const {loginFetch, generateHashCash} = require("./utils");
-const {loginConstraints, passwordToleranConstraints} = require("./serverInstructions");
+const { PasswordTolerance } = require("./passwordTolerance");
+const { loginFetch, generateHashCash, pdkf2 } = require("./utils");
+const { loginConstraints, passwordToleranceConstraints, passwordHashingConstraints } = require("./serverInstructions");
 
 
 class Signum {
@@ -24,7 +24,7 @@ The response may be a proof of work request, or the actual login.
      */
 
     static async executeLogin(username, hashedPasstext, loginUrl, serverInstructions, referer, state, csrfToken = "",
-                              loginFunction = loginFetch) {
+        loginFunction = loginFetch) {
         if (!username) {
             throw new Error("Username is null or empty");
         }
@@ -37,7 +37,7 @@ The response may be a proof of work request, or the actual login.
             throw new Error("loginUrl is null or empty");
         }
 
-        const invalidLoginUrl = validate.single(loginUrl, {url: {allowLocal: true}});
+        const invalidLoginUrl = validate.single(loginUrl, { url: { allowLocal: true } });
 
         if (invalidLoginUrl) {
             throw new Error(
@@ -57,7 +57,7 @@ The response may be a proof of work request, or the actual login.
             throw new Error("state is null or empty");
         }
 
-        const invalidServerInstructions = validate(serverInstructions, loginConstraints, {format: "flat"});
+        const invalidServerInstructions = validate(serverInstructions, loginConstraints, { format: "flat" });
 
         if (invalidServerInstructions) {
             throw new Error(
@@ -92,7 +92,7 @@ The response may be a proof of work request, or the actual login.
         });
     }
 
-      static normalizePassphrase(passphrase, serverInstructions) {
+    static normalizePassphrase(passphrase, serverInstructions) {
         if (!passphrase) {
             throw new Error("Passphrase is null or empty");
         }
@@ -101,7 +101,7 @@ The response may be a proof of work request, or the actual login.
             throw new Error("serverInstructions is null or empty");
         }
 
-        const invalidServerInstructions = validate(serverInstructions, passwordToleranConstraints, {format: "flat"});
+        const invalidServerInstructions = validate(serverInstructions, passwordToleranceConstraints, { format: "flat" });
 
         if (invalidServerInstructions) {
             throw new Error(
@@ -109,12 +109,41 @@ The response may be a proof of work request, or the actual login.
             );
         }
 
-        if(serverInstructions.normalizers && passphrase.length >= serverInstructions.passphraseMinimalLength) {
+        if (serverInstructions.normalizers && passphrase.length >= serverInstructions.passphraseMinimalLength) {
             passphrase = new PasswordTolerance(passphrase, serverInstructions.normalizers).normalize();
         }
 
         return passphrase;
     }
+
+    static async hashPasstext(passtext, serverInstructions, username = "") {
+        if (!passtext) {
+            throw new Error("Passtext is null or empty");
+        }
+
+        if (!serverInstructions) {
+            throw new Error("serverInstructions is null or empty");
+        }
+
+        const invalidServerInstructions = validate(serverInstructions, passwordHashingConstraints, { format: "flat" });
+
+        if (invalidServerInstructions) {
+            throw new Error(
+                `Bad serverInstructions: ${JSON.stringify(invalidServerInstructions)}`
+            );
+        }
+
+        const invalidUsername = validate.single(username, { type: "string" });
+
+        if (invalidUsername) {
+            throw new Error(
+                `Bad Username: Username ${JSON.stringify(invalidUsername)}`
+            );
+        }
+
+        return await pdkf2(passtext, username, serverInstructions.hashCycles, serverInstructions.resultLength);
+    }
+
 }
 
 exports.Signum = Signum;
