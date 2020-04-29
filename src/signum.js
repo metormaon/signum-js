@@ -109,7 +109,7 @@ The response may be a proof of work request, or the actual login.
             );
         }
 
-        if(serverInstructions.normalizers && passphrase.length >= serverInstructions.minimalLength) {
+        if(serverInstructions.normalizers && passphrase.length >= serverInstructions.passphraseMinimalLength) {
             passphrase = new PasswordTolerance(passphrase, serverInstructions.normalizers).normalize();
         }
 

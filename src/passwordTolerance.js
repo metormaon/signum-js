@@ -5,7 +5,7 @@ class PasswordTolerance {
     }
 
     normalize() {
-        for(let normalizer of this.actualNormalizers) {
+        for (let normalizer of this.actualNormalizers) {
             this.passphrase = normalizer.normalize(this.passphrase);
         }
 
@@ -15,25 +15,11 @@ class PasswordTolerance {
     buildNormalizers(normalizers) {
         let res = [];
 
-        if(normalizers.lowerCase) {
-            res.push(new LowerCaseNormalize());
-        }
-
-        if(normalizers.trim) {
-            res.push(new TrimNormalize());
-        }
-
-        if(normalizers.whitespacesToDash) {
-            res.push(new WhitespacesToDashNormalize());
-        }
-
-        if(normalizers.digitsToSingleZero) {
-            res.push(new DigitsToSingleZeroNormalize());
-        }
-
-        if(normalizers.removePunctuation) {
-            res.push(new RemovePunctuationNormalize());
-        }
+        if (normalizers.lowerCase) res.push(new LowerCaseNormalize());
+        if (normalizers.trim) res.push(new TrimNormalize());
+        if (normalizers.whitespacesToDash) res.push(new WhitespacesToDashNormalize());
+        if (normalizers.digitsToSingleZero) res.push(new DigitsToSingleZeroNormalize());
+        if (normalizers.removePunctuation) res.push(new RemovePunctuationNormalize());
 
         return res;
     }

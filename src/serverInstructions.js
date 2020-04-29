@@ -59,7 +59,7 @@ const passwordToleranConstraints = {
         presence: false,
         type: "boolean"
     },
-    minimalLength: {
+    passphraseMinimalLength: {
         presence: true,
         numericality: {
             onlyInteger: true,
