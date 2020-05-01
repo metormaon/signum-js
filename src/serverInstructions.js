@@ -81,8 +81,13 @@ const passwordHashingConstraints = {
         presence: true,
         numericality: {
             onlyInteger: true,
-            greaterThanOrEqualTo: 20
+            greaterThanOrEqualTo: 20,
+            even: true
         }
+    },
+    saltHashByUsername: {
+        presence: false,
+        type: "boolean"
     }
 };
 

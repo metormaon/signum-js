@@ -117,6 +117,8 @@ The response may be a proof of work request, or the actual login.
     }
 
     static async hashPasstext(passtext, serverInstructions, username = "") {
+        let salt = "";
+
         if (!passtext) {
             throw new Error("Passtext is null or empty");
         }
@@ -133,15 +135,17 @@ The response may be a proof of work request, or the actual login.
             );
         }
 
-        const invalidUsername = validate.single(username, { type: "string" });
-
-        if (invalidUsername) {
-            throw new Error(
-                `Bad Username: Username ${JSON.stringify(invalidUsername)}`
-            );
+        if(serverInstructions.saltHashByUsername) {
+            const invalidUsername = validate.single(username, { presence : {allowEmpty: false}, type: "string"});
+            if (invalidUsername) {
+                throw new Error(
+                    `Bad Username: Username ${JSON.stringify(invalidUsername)}`
+                );
+            }
+            salt = username;
         }
 
-        return await pdkf2(passtext, username, serverInstructions.hashCycles, serverInstructions.resultLength);
+        return await pdkf2(passtext, salt, serverInstructions.hashCycles, serverInstructions.resultLength / 2);
     }
 
 }

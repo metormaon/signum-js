@@ -19,20 +19,44 @@ describe("hashPasstext", function () {
         ).toBeRejectedWithError("serverInstructions is null or empty");
     });
 
-    it("should fail non string username", async function () {
+
+    it("should fail non boolean saltHashByUsername", async function () {
         const serverInstructions = {
+            saltHashByUsername: 1,
             hashCycles: 3,
-            resultLength: 20
+            resultLength: 20,
         };
         await expectAsync(
-            Signum.hashPasstext("sdf57fs7", serverInstructions, true)
-        ).toBeRejectedWithError("Bad Username: Username [\"must be of type string\"]");
+            Signum.hashPasstext("sdf57fs7", serverInstructions)
+        ).toBeRejectedWithError("Bad serverInstructions: [\"Salt hash by username must be of type boolean\"]");
     });
+
+    const scenariosUsername = [
+        { value: null, error: "can't be blank" },
+        { value: undefined, error: "can't be blank" },
+        { value: "", error: "can't be blank" },
+        { value: 1, error: "must be of type string" }
+    ];
+
+     for (const { value, error } of scenariosUsername) {
+        it(`should fail because username ${error} when saltHashByUsername is true`, async function () {
+
+            const serverInstructions = {
+                saltHashByUsername: true,
+                hashCycles: 3,
+                resultLength: 20,
+            };
+
+            await expectAsync(
+                Signum.hashPasstext("sdf57fs7", serverInstructions, value)
+            ).toBeRejectedWithError(`Bad Username: Username [\"${error}\"]`);
+        });
+    }
 
     const scenariosHashCycles = [
         { value: "Josh", error: "is not a number" },
         { value: 1.2, error: "must be an integer" },
-        { value: -1, error: "must be greater than or equal to 1" },
+        { value: -1, error: "must be greater than or equal to 1" }
     ];
 
     for (const { value, error } of scenariosHashCycles) {
@@ -52,7 +76,8 @@ describe("hashPasstext", function () {
     const scenariosResultLength = [
         { value: "Josh", error: "is not a number" },
         { value: 1.2, error: "must be an integer" },
-        { value: 19, error: "must be greater than or equal to 20" },
+        { value: 18, error: "must be greater than or equal to 20" },
+        { value: 21, error: "must be even" }
     ];
 
     for (const { value, error } of scenariosResultLength) {
@@ -71,25 +96,27 @@ describe("hashPasstext", function () {
 
     it("should hashing right without username", async function () {
         const serverInstructions = {
+            saltHashByUsername: false,
             hashCycles: 3,
             resultLength: 20
         };
 
         let hashedPasstext = await Signum.hashPasstext("sdf57fs7", serverInstructions, "");
 
-        expect(hashedPasstext).toEqual("3b640263b35f52c731f0ff71b527817b0080c0cf");
-        expect(hashedPasstext.length).toEqual(40);
+        expect(hashedPasstext).toEqual("3b640263b35f52c731f0");
+        expect(hashedPasstext.length).toEqual(20);
     });
 
     it("should hashing right with username", async function () {
         const serverInstructions = {
+            saltHashByUsername: true,
             hashCycles: 3,
             resultLength: 20
         };
 
         let hashedPasstext = await Signum.hashPasstext("sdf57fs7", serverInstructions, "joe");
 
-        expect(hashedPasstext).toEqual("9e9181be6987c2d0556c5763312b41924dc8203f");
-        expect(hashedPasstext.length).toEqual(40);
+        expect(hashedPasstext).toEqual("9e9181be6987c2d0556c");
+        expect(hashedPasstext.length).toEqual(20);
     });
 });
