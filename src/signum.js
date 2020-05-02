@@ -1,7 +1,7 @@
 const validate = require("validate.js");
 const {PasswordTolerance:PasswordToleranceRef} = require("./passwordTolerance");
 const {loginFetch, generateHashCash} = require("./utils");
-const {loginConstraints, passwordToleranConstraints} = require("./serverInstructions");
+const {loginConstraints:loginConstraintsRef, passwordToleranConstraints:passwordToleranceContraintsRef} = require("./serverInstructions");
 
 
 class Signum {
@@ -57,7 +57,7 @@ The response may be a proof of work request, or the actual login.
             throw new Error("state is null or empty");
         }
 
-        const invalidServerInstructions = validate(serverInstructions, loginConstraints, {format: "flat"});
+        const invalidServerInstructions = validate(serverInstructions, loginConstraintsRef, {format: "flat"});
 
         if (invalidServerInstructions) {
             throw new Error(
@@ -101,7 +101,7 @@ The response may be a proof of work request, or the actual login.
             throw new Error("serverInstructions is null or empty");
         }
 
-        const invalidServerInstructions = validate(serverInstructions, passwordToleranConstraints, {format: "flat"});
+        const invalidServerInstructions = validate(serverInstructions, passwordToleranConstraintsRef, {format: "flat"});
 
         if (invalidServerInstructions) {
             throw new Error(
