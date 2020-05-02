@@ -2312,7 +2312,6 @@ class Signum {
     }
 }
 
-//module.exports = Signum;
 exports.Signum = Signum;
 
 
