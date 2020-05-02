@@ -27,12 +27,12 @@ jobs:
         mkdir -p tmp
         sudo npm install -g browserify
         browserify src/signum.js -o js/signum-bundle.js
+        rm -r tmp
 #        sudo npm install -g uglify-es
 #        cp src/*.js tmp
 #        sed -i.bak '/require(".\//d' tmp/*
 #        sed -i.bak '/^\s*exports\./d' tmp/*
 #        uglifyjs tmp/*.js -o js/signum.min.js --source-map "filename='js/signum.min.js.map',url='signum.min.js.map'"
-        rm -r tmp
 
 browserify main.js -o bundle.js
 
