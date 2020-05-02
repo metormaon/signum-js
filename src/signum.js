@@ -1,6 +1,9 @@
+"use strict";
+
 const validate = require("validate.js");
-const  { PasswordTolerance } = require("./passwordTolerance");
 const {loginFetch, generateHashCash} = require("./utils");
+
+const {PasswordTolerance} = require("./passwordTolerance");
 const {loginConstraints, passwordToleranConstraints} = require("./serverInstructions");
 
 
