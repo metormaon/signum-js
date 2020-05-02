@@ -27,7 +27,7 @@ jobs:
       run: |
         mkdir -p js
         sudo npm install -g uglify-es
-        uglifyjs src/*.js -o js/signum.min.js
+        uglifyjs src/*.js -o js/signum.min.js --source-map filename js/signum.min.js.map
 
     - name: Commit minified files
       uses: stefanzweifel/git-auto-commit-action@v4.1.6      
