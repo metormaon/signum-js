@@ -1,4 +1,4 @@
-const {Signum} = require('../src/signum.js');
+const {Signum} = module.require('../src/signum.js');
 
 describe("submitLogin", function() {
     it("should fail without username", async function () {

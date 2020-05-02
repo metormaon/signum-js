@@ -6,7 +6,6 @@ const {loginFetch, generateHashCash} = require("./utils");
 const {PasswordTolerance} = require("./passwordTolerance");
 const {loginConstraints, passwordToleranConstraints} = require("./serverInstructions");
 
-
 class Signum {
     static async executeLogin(username, hashedPasstext, loginUrl, serverInstructions, referer, state, csrfToken = "",
                               loginFunction = loginFetch) {
@@ -102,6 +101,6 @@ class Signum {
     }
 }
 
+//module.exports = Signum;
 exports.Signum = Signum;
 
-global.Signum = Signum;
