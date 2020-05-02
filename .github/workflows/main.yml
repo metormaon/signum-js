@@ -27,8 +27,12 @@ jobs:
       uses: nizarmah/auto-minify@master
       with:
         directory: '/src'
-        output: '/js'  
 
+    - name: Arrange artifacts
+      run: |
+        mkdir -p /js
+        cp /src/*.min.js /js 
+          
     # Auto commits minified files to the repository
     # Ignore it if you don't want to commit the files to the repository 
     - name: Auto committing minified files
