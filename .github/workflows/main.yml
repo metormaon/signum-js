@@ -22,11 +22,11 @@ jobs:
 
     - name: What is wrong?
       run: |
-        npm list -g --depth=0
-        npm bin -g
+        sudo npm list -g --depth=0
+        sudo npm bin -g
       
     - name: Run tests
-      run: npm test
+      run: sudo npm test
       
     - name: Minify code
       run: sudo minify-all /src
