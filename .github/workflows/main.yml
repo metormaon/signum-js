@@ -27,12 +27,8 @@ jobs:
         mkdir -p tmp
         sudo npm install -g browserify
         browserify src/signum.js -o js/signum-bundle.js
+        uglifyjs js/signum-bundle.js -o js/signum-bindle.min.js --source-map "filename='js/signum-bundle.min.js.map',url='signum-bundle.min.js.map'"
         rm -r tmp
-#        sudo npm install -g uglify-es
-#        cp src/*.js tmp
-#        sed -i.bak '/require(".\//d' tmp/*
-#        sed -i.bak '/^\s*exports\./d' tmp/*
-#        uglifyjs tmp/*.js -o js/signum.min.js --source-map "filename='js/signum.min.js.map',url='signum.min.js.map'"
 
     - name: Commit minified files
       uses: stefanzweifel/git-auto-commit-action@v4.1.6      
