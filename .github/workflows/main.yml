@@ -23,16 +23,12 @@ jobs:
     - name: Run tests
       run: npm test
       
-    - name: Minify code
-      run: |
-        sudo npm install -g uglify-js
-        uglifyjs src/signum.js -o js/signum.min.js
-
-    - name: Arrange artifacts
+    - name: Package code
       run: |
         mkdir -p js
-        cp src/*.min.js js 
-          
+        sudo npm install -g butternut
+        squash src/signum.js > js/signum.min.js
+
     # Auto commits minified files to the repository
     # Ignore it if you don't want to commit the files to the repository 
     - name: Commit minified files
