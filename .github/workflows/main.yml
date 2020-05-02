@@ -20,19 +20,13 @@ jobs:
     - name: Install modules
       run: sudo npm install --global
 
-    - name: Install minify
-      run: sudo npm install --global minify-all
-
-    - name: What is wrong?
-      run: |
-        sudo npm list -g --depth=0
-        sudo npm bin -g
-      
     - name: Run tests
       run: sudo npm test
       
     - name: Minify code
-      run: sudo minify-all /src
+      run: |
+        sudo npm install --global minify-all
+        sudo minify-all /src
 
     - name: Arrange artifacts
       run: |
