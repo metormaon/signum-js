@@ -13,8 +13,7 @@
     "dateformat": "^3.0.3",
     "hex-to-binary": "^1.0.1",
     "jasmine": "^3.5.0",
-    "validate.js": "^0.13.1",
-    "minify": "^5.1.1"
+    "validate.js": "^0.13.1"
   },
   "scripts": {
     "test": "jasmine test/*-tests.js"
