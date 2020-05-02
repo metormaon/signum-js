@@ -29,8 +29,6 @@ jobs:
         sudo npm install -g uglify-es
         uglifyjs src/*.js -o js/signum.min.js
 
-    # Auto commits minified files to the repository
-    # Ignore it if you don't want to commit the files to the repository 
     - name: Commit minified files
       uses: stefanzweifel/git-auto-commit-action@v4.1.6      
       with:
