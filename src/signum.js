@@ -102,3 +102,5 @@ class Signum {
 }
 
 exports.Signum = Signum;
+
+global.Signum = Signum;
