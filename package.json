@@ -18,5 +18,6 @@
   "scripts": {
     "test": "jasmine test/*-tests.js"
   },
-  "module": "signum"
+  "module": "signum",
+  "main": "signum.js"
 }
