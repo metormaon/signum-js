@@ -29,7 +29,7 @@ jobs:
         mkdir -p tmp
         sudo npm install -g uglify-es
         cp src/*.js tmp 
-        sed -i.bak "/require('.\//d" src/*  
+        sed -i.bak '/require(".\//d' src/*  
         uglifyjs tmp/*.js -o js/signum.min.js --source-map "filename='js/signum.min.js.map',url='signum.min.js.map'"
 
     - name: Commit minified files
