@@ -1,12 +1,14 @@
+"use strict";
+
 const validate = require("validate.js");
 const {loginFetch, generateHashCash} = require("./utils");
 
 if (typeof PasswordTolerance == 'undefined') {
-    const {PasswordTolerance} = require("./passwordTolerance");
+    var {PasswordTolerance} = require("./passwordTolerance");
 }
 
 if (typeof loginConstraints == 'undefined') {
-    const {loginConstraints, passwordToleranConstraints} = require("./serverInstructions");
+    var {loginConstraints, passwordToleranConstraints} = require("./serverInstructions");
 }
 
 class Signum {
