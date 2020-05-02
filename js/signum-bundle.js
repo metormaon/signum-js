@@ -2209,6 +2209,7 @@ const passwordToleranConstraints = {
 exports.loginConstraints = loginConstraints;
 exports.passwordToleranConstraints = passwordToleranConstraints;
 },{}],7:[function(require,module,exports){
+(function (global){
 "use strict";
 
 const validate = require("validate.js");
@@ -2219,24 +2220,6 @@ const {loginConstraints, passwordToleranConstraints} = require("./serverInstruct
 
 
 class Signum {
-    /*
-
-    POST
-Ensure referrer
-Send x-Requested-With: XmlHttpRequest
-Ensure Synchronizer Token
-Ensure elapsed time
-Send hashcash if was requested
-Send captcha if was requested
-
-
-
-The response may be a proof of work request, or the actual login.
-
-
-
-     */
-
     static async executeLogin(username, hashedPasstext, loginUrl, serverInstructions, referer, state, csrfToken = "",
                               loginFunction = loginFetch) {
         if (!username) {
@@ -2332,6 +2315,10 @@ The response may be a proof of work request, or the actual login.
 }
 
 exports.Signum = Signum;
+
+global.Signum = Signum;
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./passwordTolerance":5,"./serverInstructions":6,"./utils":8,"validate.js":4}],8:[function(require,module,exports){
 (function (Buffer){
 const fetch = require("cross-fetch");
