@@ -18,7 +18,7 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Install modules
-      run: npm install --global
+      run: sudo npm install --global
 
     - name: Run tests
       run: npm test
