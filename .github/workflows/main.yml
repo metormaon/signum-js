@@ -34,8 +34,6 @@ jobs:
 #        sed -i.bak '/^\s*exports\./d' tmp/*
 #        uglifyjs tmp/*.js -o js/signum.min.js --source-map "filename='js/signum.min.js.map',url='signum.min.js.map'"
 
-browserify main.js -o bundle.js
-
     - name: Commit minified files
       uses: stefanzweifel/git-auto-commit-action@v4.1.6      
       with:
