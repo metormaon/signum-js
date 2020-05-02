@@ -25,8 +25,8 @@ jobs:
       
     - name: Minify code
       run: |
-        sudo npm install -g minify-all uglify-js
-        minify-all src
+        sudo npm install -g uglify-js
+        uglifyjs src/signum.js js/signum.min.js
 
     - name: Arrange artifacts
       run: |
