@@ -23,10 +23,8 @@ jobs:
     - name: Running tests
       run: npm test
       
-    - name: Auto Minify
-      uses: nizarmah/auto-minify@master
-      with:
-        directory: '/src'
+    - name: Minify
+      run: minify-all /src
 
     - name: Arrange artifacts
       run: |
