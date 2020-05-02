@@ -1,12 +1,11 @@
 const validate = require("validate.js");
+const {loginFetch, generateHashCash} = require("./utils");
 
-if (!PasswordTolerance) {
+if (typeof PasswordTolerance == 'undefined') {
     const {PasswordTolerance} = require("./passwordTolerance");
 }
 
-const {loginFetch, generateHashCash} = require("./utils");
-
-if (!loginConstraints) {
+if (typeof loginConstraints == 'undefined') {
     const {loginConstraints, passwordToleranConstraints} = require("./serverInstructions");
 }
 
