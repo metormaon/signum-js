@@ -18,13 +18,13 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Install modules
-      run: npm install
+      run: npm install --global
 
     - name: Run tests
       run: npm test
       
     - name: Minify code
-      run: npm minify-all /src
+      run: minify-all /src
 
     - name: Arrange artifacts
       run: |
