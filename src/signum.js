@@ -1,28 +1,16 @@
 const validate = require("validate.js");
-const {PasswordTolerance:PasswordToleranceRef} = require("./passwordTolerance");
-const {loginFetch, generateHashCash} = require("./utils");
-const {loginConstraints:loginConstraintsRef, passwordToleranConstraints:passwordToleranceContraintsRef} = require("./serverInstructions");
 
+if (!PasswordTolerance) {
+    const {PasswordTolerance} = require("./passwordTolerance");
+}
+
+const {loginFetch, generateHashCash} = require("./utils");
+
+if (!loginConstraints) {
+    const {loginConstraints, passwordToleranConstraints} = require("./serverInstructions");
+}
 
 class Signum {
-    /*
-
-    POST
-Ensure referrer
-Send x-Requested-With: XmlHttpRequest
-Ensure Synchronizer Token
-Ensure elapsed time
-Send hashcash if was requested
-Send captcha if was requested
-
-
-
-The response may be a proof of work request, or the actual login.
-
-
-
-     */
-
     static async executeLogin(username, hashedPasstext, loginUrl, serverInstructions, referer, state, csrfToken = "",
                               loginFunction = loginFetch) {
         if (!username) {
@@ -57,7 +45,7 @@ The response may be a proof of work request, or the actual login.
             throw new Error("state is null or empty");
         }
 
-        const invalidServerInstructions = validate(serverInstructions, loginConstraintsRef, {format: "flat"});
+        const invalidServerInstructions = validate(serverInstructions, loginConstraints, {format: "flat"});
 
         if (invalidServerInstructions) {
             throw new Error(
@@ -101,7 +89,7 @@ The response may be a proof of work request, or the actual login.
             throw new Error("serverInstructions is null or empty");
         }
 
-        const invalidServerInstructions = validate(serverInstructions, passwordToleranConstraintsRef, {format: "flat"});
+        const invalidServerInstructions = validate(serverInstructions, passwordToleranConstraints, {format: "flat"});
 
         if (invalidServerInstructions) {
             throw new Error(
@@ -110,7 +98,7 @@ The response may be a proof of work request, or the actual login.
         }
 
         if(serverInstructions.normalizers && passphrase.length >= serverInstructions.passphraseMinimalLength) {
-            passphrase = new PasswordToleranceRef(passphrase, serverInstructions.normalizers).normalize();
+            passphrase = new PasswordTolerance(passphrase, serverInstructions.normalizers).normalize();
         }
 
         return passphrase;
