@@ -20,6 +20,11 @@ jobs:
     - name: Install modules
       run: sudo npm install --global
 
+    - name: What is wrong?
+      run: |
+        npm list -g --depth=0
+        npm bin -g
+      
     - name: Run tests
       run: npm test
       
