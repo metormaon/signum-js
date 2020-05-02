@@ -17,27 +17,21 @@ jobs:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
 
-    - name: Installing modules
+    - name: Install modules
       run: npm install
 
-    - name: Running tests
+    - name: Run tests
       run: npm test
       
-    - name: Auto Minify
-      uses: nizarmah/auto-minify@master
-      with:
-        directory: '/src'
-
-    - name: Arrange artifacts
+    - name: Package code
       run: |
-        mkdir -p /js
-        cp /src/*.min.js /js 
-          
-    # Auto commits minified files to the repository
-    # Ignore it if you don't want to commit the files to the repository 
-    - name: Auto committing minified files
+        mkdir -p js
+        sudo npm install -g uglify-es
+        uglifyjs src/*.js -o js/signum.min.js --source-map "filename='js/signum.min.js.map'"
+
+    - name: Commit minified files
       uses: stefanzweifel/git-auto-commit-action@v4.1.6      
       with:
-        repository: '/js'
+        repository: 'js'
         commit_message: "Github Action: Auto Minified JS and CSS files"
         branch: ${{ github.ref }}
