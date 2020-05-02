@@ -1,5 +1,5 @@
 const validate = require("validate.js");
-const {PasswordToleranceRef} = require("./passwordTolerance");
+const {PasswordTolerance:PasswordToleranceRef} = require("./passwordTolerance");
 const {loginFetch, generateHashCash} = require("./utils");
 const {loginConstraints, passwordToleranConstraints} = require("./serverInstructions");
 
