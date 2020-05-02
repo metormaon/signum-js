@@ -8,24 +8,6 @@ const {loginConstraints, passwordToleranConstraints} = require("./serverInstruct
 
 
 class Signum {
-    /*
-
-    POST
-Ensure referrer
-Send x-Requested-With: XmlHttpRequest
-Ensure Synchronizer Token
-Ensure elapsed time
-Send hashcash if was requested
-Send captcha if was requested
-
-
-
-The response may be a proof of work request, or the actual login.
-
-
-
-     */
-
     static async executeLogin(username, hashedPasstext, loginUrl, serverInstructions, referer, state, csrfToken = "",
                               loginFunction = loginFetch) {
         if (!username) {
@@ -121,3 +103,5 @@ The response may be a proof of work request, or the actual login.
 }
 
 exports.Signum = Signum;
+
+global.Signum = Signum;
