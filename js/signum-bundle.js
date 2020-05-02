@@ -2209,7 +2209,6 @@ const passwordToleranConstraints = {
 exports.loginConstraints = loginConstraints;
 exports.passwordToleranConstraints = passwordToleranConstraints;
 },{}],7:[function(require,module,exports){
-(function (global){
 "use strict";
 
 const validate = require("validate.js");
@@ -2217,7 +2216,6 @@ const {loginFetch, generateHashCash} = require("./utils");
 
 const {PasswordTolerance} = require("./passwordTolerance");
 const {loginConstraints, passwordToleranConstraints} = require("./serverInstructions");
-
 
 class Signum {
     static async executeLogin(username, hashedPasstext, loginUrl, serverInstructions, referer, state, csrfToken = "",
@@ -2314,11 +2312,10 @@ class Signum {
     }
 }
 
+//module.exports = Signum;
 exports.Signum = Signum;
 
-global.Signum = Signum;
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./passwordTolerance":5,"./serverInstructions":6,"./utils":8,"validate.js":4}],8:[function(require,module,exports){
 (function (Buffer){
 const fetch = require("cross-fetch");
