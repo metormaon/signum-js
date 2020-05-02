@@ -3,13 +3,9 @@
 const validate = require("validate.js");
 const {loginFetch, generateHashCash} = require("./utils");
 
-if (typeof PasswordTolerance == 'undefined') {
-    var {PasswordTolerance} = require("./passwordTolerance");
-}
+const {PasswordTolerance} = require("./passwordTolerance");
+const {loginConstraints, passwordToleranConstraints} = require("./serverInstructions");
 
-if (typeof loginConstraints == 'undefined') {
-    var {loginConstraints, passwordToleranConstraints} = require("./serverInstructions");
-}
 
 class Signum {
     static async executeLogin(username, hashedPasstext, loginUrl, serverInstructions, referer, state, csrfToken = "",
