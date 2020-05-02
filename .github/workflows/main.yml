@@ -27,7 +27,7 @@ jobs:
         mkdir -p tmp
         sudo npm install -g browserify uglify-es
         browserify src/signum.js -o js/signum-bundle.js
-        uglifyjs js/signum-bundle.js -o js/signum-bindle.min.js --source-map "filename='js/signum-bundle.min.js.map',url='signum-bundle.min.js.map'"
+        uglifyjs js/signum-bundle.js -o js/signum-bundle.min.js --source-map "filename='js/signum-bundle.min.js.map',url='signum-bundle.min.js.map'"
         rm -r tmp
 
     - name: Commit minified files
