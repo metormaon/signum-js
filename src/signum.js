@@ -1,5 +1,5 @@
 const validate = require("validate.js");
-const  { PasswordTolerance } = require("./passwordTolerance");
+const {PasswordToleranceRef} = require("./passwordTolerance");
 const {loginFetch, generateHashCash} = require("./utils");
 const {loginConstraints, passwordToleranConstraints} = require("./serverInstructions");
 
@@ -110,7 +110,7 @@ The response may be a proof of work request, or the actual login.
         }
 
         if(serverInstructions.normalizers && passphrase.length >= serverInstructions.passphraseMinimalLength) {
-            passphrase = new PasswordTolerance(passphrase, serverInstructions.normalizers).normalize();
+            passphrase = new PasswordToleranceRef(passphrase, serverInstructions.normalizers).normalize();
         }
 
         return passphrase;
