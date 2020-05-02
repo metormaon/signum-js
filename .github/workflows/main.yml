@@ -20,6 +20,9 @@ jobs:
     - name: Install modules
       run: sudo npm install --global
 
+    - name: Install minify
+      run: sudo npm install --global minify-all
+
     - name: What is wrong?
       run: |
         sudo npm list -g --depth=0
