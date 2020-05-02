@@ -25,7 +25,7 @@ jobs:
       
     - name: Minify code
       run: |
-        npm install minify-all
+        sudo npm install -g minify-all
         minify-all src
 
     - name: Arrange artifacts
