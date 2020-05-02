@@ -26,8 +26,11 @@ jobs:
     - name: Package code
       run: |
         mkdir -p js
+        mkdir -p tmp
         sudo npm install -g uglify-es
-        uglifyjs src/*.js -o js/signum.min.js --source-map "filename='js/signum.min.js.map',url='signum.min.js.map'"
+        cp src/*.js tmp 
+        sed -i.bak "/require('.\//d" src/*  
+        uglifyjs tmp/*.js -o js/signum.min.js --source-map "filename='js/signum.min.js.map',url='signum.min.js.map'"
 
     - name: Commit minified files
       uses: stefanzweifel/git-auto-commit-action@v4.1.6      
