@@ -18,26 +18,26 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Install modules
-      run: sudo npm install --global
+      run: npm install
 
     - name: Run tests
-      run: sudo npm test
+      run: npm test
       
     - name: Minify code
       run: |
-        sudo npm install --global minify-all
-        sudo minify-all /src
+        npm install minify-all
+        minify-all src
 
     - name: Arrange artifacts
       run: |
-        mkdir -p /js
-        cp /src/*.min.js /js 
+        mkdir -p js
+        cp src/*.min.js js 
           
     # Auto commits minified files to the repository
     # Ignore it if you don't want to commit the files to the repository 
     - name: Commit minified files
       uses: stefanzweifel/git-auto-commit-action@v4.1.6      
       with:
-        repository: '/js'
+        repository: 'js'
         commit_message: "Github Action: Auto Minified JS and CSS files"
         branch: ${{ github.ref }}
