@@ -2218,6 +2218,7 @@ const {loginFetch, generateHashCash} = require("./utils");
 const {PasswordTolerance} = require("./passwordTolerance");
 const {loginConstraints, passwordToleranConstraints} = require("./serverInstructions");
 
+
 class Signum {
     static async executeLogin(username, hashedPasstext, loginUrl, serverInstructions, referer, state, csrfToken = "",
                               loginFunction = loginFetch) {
@@ -2231,14 +2232,6 @@ class Signum {
 
         if (!loginUrl) {
             throw new Error("loginUrl is null or empty");
-        }
-
-        const invalidLoginUrl = validate.single(loginUrl, {url: {allowLocal: true}});
-
-        if (invalidLoginUrl) {
-            throw new Error(
-                `Bad loginUrl: ${loginUrl} ${JSON.stringify(invalidLoginUrl)}`
-            );
         }
 
         if (!serverInstructions) {
