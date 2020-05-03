@@ -37,12 +37,6 @@ describe("submitLogin", function() {
         ).toBeRejectedWithError("loginUrl is null or empty");
     });
 
-    it("should fail with bad loginUrl", async function () {
-        await expectAsync(
-            Signum.executeLogin("joe", "sdf57fs7", "zubzubzubzub")
-        ).toBeRejectedWithError("Bad loginUrl: zubzubzubzub [\"is not a valid url\"]");
-    });
-
     it("should fail without serverInstructions", async function () {
         await expectAsync(
             Signum.executeLogin("joe", "sdf57fs7", "http://localhost")

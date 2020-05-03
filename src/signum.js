@@ -22,14 +22,6 @@ class Signum {
             throw new Error("loginUrl is null or empty");
         }
 
-        const invalidLoginUrl = validate.single(loginUrl, {url: {allowLocal: true}});
-
-        if (invalidLoginUrl) {
-            throw new Error(
-                `Bad loginUrl: ${loginUrl} ${JSON.stringify(invalidLoginUrl)}`
-            );
-        }
-
         if (!serverInstructions) {
             throw new Error("serverInstructions is null or empty");
         }
