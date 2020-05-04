@@ -1,13 +1,15 @@
 "use strict";
 
 const validate = require("validate.js");
-const { PasswordTolerance } = require("./passwordTolerance");
-const { loginFetch, generateHashCash, pdkf2 } = require("./utils");
-const { loginConstraints, passwordToleranceConstraints, passwordHashingConstraints } = require("./serverInstructions");
+const {loginFetch, generateHashCash} = require("./utils");
+
+const {PasswordTolerance} = require("./passwordTolerance");
+const {loginConstraints, passwordToleranConstraints} = require("./serverInstructions");
+
 
 class Signum {
     static async executeLogin(username, hashedPasstext, loginUrl, serverInstructions, referer, state, csrfToken = "",
-        loginFunction = loginFetch) {
+                              loginFunction = loginFetch) {
         if (!username) {
             throw new Error("Username is null or empty");
         }
@@ -20,7 +22,7 @@ class Signum {
             throw new Error("loginUrl is null or empty");
         }
 
-        const invalidLoginUrl = validate.single(loginUrl, { url: { allowLocal: true } });
+        const invalidLoginUrl = validate.single(loginUrl, {url: {allowLocal: true}});
 
         if (invalidLoginUrl) {
             throw new Error(
@@ -40,7 +42,7 @@ class Signum {
             throw new Error("state is null or empty");
         }
 
-        const invalidServerInstructions = validate(serverInstructions, loginConstraints, { format: "flat" });
+        const invalidServerInstructions = validate(serverInstructions, loginConstraints, {format: "flat"});
 
         if (invalidServerInstructions) {
             throw new Error(
@@ -75,7 +77,7 @@ class Signum {
         });
     }
 
-    static normalizePassphrase(passphrase, serverInstructions) {
+      static normalizePassphrase(passphrase, serverInstructions) {
         if (!passphrase) {
             throw new Error("Passphrase is null or empty");
         }
@@ -84,7 +86,7 @@ class Signum {
             throw new Error("serverInstructions is null or empty");
         }
 
-        const invalidServerInstructions = validate(serverInstructions, passwordToleranceConstraints, { format: "flat" });
+        const invalidServerInstructions = validate(serverInstructions, passwordToleranConstraints, {format: "flat"});
 
         if (invalidServerInstructions) {
             throw new Error(
@@ -92,45 +94,12 @@ class Signum {
             );
         }
 
-        if (serverInstructions.normalizers && passphrase.length >= serverInstructions.passphraseMinimalLength) {
+        if(serverInstructions.normalizers && passphrase.length >= serverInstructions.passphraseMinimalLength) {
             passphrase = new PasswordTolerance(passphrase, serverInstructions.normalizers).normalize();
         }
 
         return passphrase;
     }
-
-    static async hashPasstext(passtext, serverInstructions, username = "") {
-        let salt = "";
-
-        if (!passtext) {
-            throw new Error("Passtext is null or empty");
-        }
-
-        if (!serverInstructions) {
-            throw new Error("serverInstructions is null or empty");
-        }
-
-        const invalidServerInstructions = validate(serverInstructions, passwordHashingConstraints, { format: "flat" });
-
-        if (invalidServerInstructions) {
-            throw new Error(
-                `Bad serverInstructions: ${JSON.stringify(invalidServerInstructions)}`
-            );
-        }
-
-        if(serverInstructions.saltHashByUsername) {
-            const invalidUsername = validate.single(username, { presence : {allowEmpty: false}, type: "string"});
-            if (invalidUsername) {
-                throw new Error(
-                    `Bad Username: Username ${JSON.stringify(invalidUsername)}`
-                );
-            }
-            salt = username;
-        }
-
-        return await pdkf2(passtext, salt, serverInstructions.hashCycles, serverInstructions.resultLength / 2);
-    }
-
 }
 
 exports.Signum = Signum;
