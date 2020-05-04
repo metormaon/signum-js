@@ -1,6 +1,17 @@
 const {Signum} = require('../src/signum.js');
 
 describe("submitLogin", function() {
+    let originalTimeout;
+
+    beforeEach(function() {
+        originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
+        jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000;
+    });
+
+    afterEach(function() {
+        jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
+    });
+
     it("should fail without username", async function () {
         await expectAsync(
             Signum.executeLogin()
@@ -146,7 +157,7 @@ describe("submitLogin", function() {
             'X-Username': "joe",
             'X-hashed-Passtext': "sdf57fs7"
         },
-        body: "state",
+        body: {state: 'state'},
         referrer: "referer"
     };
 
