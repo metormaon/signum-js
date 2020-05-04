@@ -1,13 +1,93 @@
 "use strict";
 
 const validate = require("validate.js");
-const { loginFetch, generateHashCash, pdkf2 } = require("./utils");
+const { fetchUrl, generateHashCash, pdkf2 } = require("./utils");
 const { PasswordTolerance } = require("./passwordTolerance");
-const { loginConstraints, passwordToleranceConstraints, passwordHashingConstraints } = require("./serverInstructions");
+const { loginConstraints, passwordToleranceConstraints, passwordHashingConstraints, signupConstraints } = require("./serverInstructions");
 
 class Signum {
+
+    static async executeSignup(username, passtext, captcha, signupUrl, serverInstructions, referer, state, csrfToken = "",
+        signupFunction = fetchUrl) {
+        if (!username) {
+            throw new Error("Username is null or empty");
+        }
+
+        if (!passtext) {
+            throw new Error("Passtext is null or empty");
+        }
+
+        if (!captcha) {
+            throw new Error("captcha is null or empty");
+        }
+
+        if (!signupUrl) {
+            throw new Error("signupUrl is null or empty");
+        }
+
+        const invalidSignupUrl = validate.single(signupUrl, { url: { allowLocal: true } });
+
+        if (invalidSignupUrl) {
+            throw new Error(
+                `Bad signupUrl: ${signupUrl} ${JSON.stringify(invalidSignupUrl)}`
+            );
+        }
+
+        if (!serverInstructions) {
+            throw new Error("serverInstructions is null or empty");
+        }
+
+        if (!referer) {
+            throw new Error("referer is null or empty");
+        }
+
+        if (!state) {
+            throw new Error("state is null or empty");
+        }
+
+        const invalidServerInstructions = validate(serverInstructions, signupConstraints, { format: "flat" });
+
+        if (invalidServerInstructions) {
+            throw new Error(
+                `Bad serverInstructions: ${JSON.stringify(invalidServerInstructions)}`
+            );
+        }
+
+        // TODO: check strength password 
+        const tolerancePassword = this.normalizePassphrase(passtext, serverInstructions.tolerance);
+        const hashedPasstext = await this.hashPasstext(tolerancePassword, serverInstructions.hashing, username);
+
+        const headers = {
+            'Content-Type': 'application/json;charset=utf-8',
+            'X-Username': username,
+            'X-hashed-Passtext': hashedPasstext,
+            'X-captcha': captcha
+        };
+
+        if (serverInstructions.hashcash && serverInstructions.hashcash.require) {
+            headers['X-Hashcash'] = await generateHashCash(serverInstructions.hashcash.zeroCount,
+                serverInstructions.hashcash.serverString);
+        }
+
+        if (serverInstructions.csrfToken && serverInstructions.csrfToken.require) {
+            if (!csrfToken) {
+                throw new Error("csrfToken is null or empty");
+            }
+
+            headers['X-Csrf-Token'] = csrfToken;
+        }
+
+        return await signupFunction(signupUrl, {
+            method: 'POST',
+            headers: headers,
+            body: state,
+            referrer: referer
+        });
+    }
+
+
     static async executeLogin(username, hashedPasstext, loginUrl, serverInstructions, referer, state, csrfToken = "",
-        loginFunction = loginFetch) {
+        loginFunction = fetchUrl) {
         if (!username) {
             throw new Error("Username is null or empty");
         }
@@ -81,7 +161,7 @@ class Signum {
         }
 
         if (!serverInstructions) {
-            throw new Error("serverInstructions is null or empty");
+            throw new Error("tolerance serverInstructions is null or empty");
         }
 
         const invalidServerInstructions = validate(serverInstructions, passwordToleranceConstraints, { format: "flat" });
@@ -107,7 +187,7 @@ class Signum {
         }
 
         if (!serverInstructions) {
-            throw new Error("serverInstructions is null or empty");
+            throw new Error("hashing serverInstructions is null or empty");
         }
 
         const invalidServerInstructions = validate(serverInstructions, passwordHashingConstraints, { format: "flat" });
@@ -118,8 +198,8 @@ class Signum {
             );
         }
 
-        if(serverInstructions.saltHashByUsername) {
-            const invalidUsername = validate.single(username, { presence : {allowEmpty: false}, type: "string"});
+        if (serverInstructions.saltHashByUsername) {
+            const invalidUsername = validate.single(username, { presence: { allowEmpty: false }, type: "string" });
             if (invalidUsername) {
                 throw new Error(
                     `Bad Username: Username ${JSON.stringify(invalidUsername)}`

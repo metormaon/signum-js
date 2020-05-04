@@ -16,7 +16,7 @@ describe("normalizePassphrase", function () {
     it("should fail without serverInstructions", function () {
         expect(function () {
             Signum.normalizePassphrase("sdf57fs7")
-        }).toThrowError("serverInstructions is null or empty");
+        }).toThrowError("tolerance serverInstructions is null or empty");
     });
 
     it("should fail missing minimal length", function () {

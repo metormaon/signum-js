@@ -16,14 +16,14 @@ async function getPublicIp() {
     });
 }
 
-async function loginFetch(loginUrl, details) {
+async function fetchUrl(url, details) {
     return new Promise((resolve, reject) => {
-        fetch(loginUrl, details)
+        fetch(url, details)
             .then((response) => {
                 if (response.ok) {
                     resolve(response.json());
                 } else {
-                    reject('Failed to fetch login');
+                    reject(`Failed to fetch ${url}`);
                 }
             });
     });
@@ -83,5 +83,5 @@ async function generateHashCash(zeroCount, serverString) {
 
 exports.generateHashCash = generateHashCash;
 exports.getPublicIp = getPublicIp;
-exports.loginFetch = loginFetch;
+exports.fetchUrl = fetchUrl;
 exports.pdkf2 = pdkf2;
