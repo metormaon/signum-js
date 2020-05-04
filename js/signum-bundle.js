@@ -2153,7 +2153,7 @@ const loginConstraints = {
         numericality: {
             onlyInteger: true,
             greaterThan: 0,
-            lessThanOrEqualTo: 50
+            lessThanOrEqualTo: 10
         }
     },
     "hashcash.serverString": {
@@ -2173,7 +2173,7 @@ const loginConstraints = {
 };
 
 
-const passwordToleranConstraints = {
+const passwordToleranceConstraints = {
     normalizers: {
         presence: false
     },
@@ -2203,25 +2203,48 @@ const passwordToleranConstraints = {
             onlyInteger: true,
             greaterThanOrEqualTo: 20
         }
-    },
+    }
 };
 
+
+const passwordHashingConstraints = {
+    hashCycles: {
+        presence: true,
+        numericality: {
+            onlyInteger: true,
+            greaterThanOrEqualTo: 1
+        }
+    },
+    resultLength: {
+        presence: true,
+        numericality: {
+            onlyInteger: true,
+            greaterThanOrEqualTo: 20,
+            even: true
+        }
+    },
+    saltHashByUsername: {
+        presence: false,
+        type: "boolean"
+    }
+};
+
+
 exports.loginConstraints = loginConstraints;
-exports.passwordToleranConstraints = passwordToleranConstraints;
+exports.passwordToleranceConstraints = passwordToleranceConstraints;
+exports.passwordHashingConstraints = passwordHashingConstraints;
 },{}],7:[function(require,module,exports){
 (function (global){
 "use strict";
 
 const validate = require("validate.js");
-const {loginFetch, generateHashCash} = require("./utils");
-
-const {PasswordTolerance} = require("./passwordTolerance");
-const {loginConstraints, passwordToleranConstraints} = require("./serverInstructions");
-
+const { loginFetch, generateHashCash, pdkf2 } = require("./utils");
+const { PasswordTolerance } = require("./passwordTolerance");
+const { loginConstraints, passwordToleranceConstraints, passwordHashingConstraints } = require("./serverInstructions");
 
 class Signum {
     static async executeLogin(username, hashedPasstext, loginUrl, serverInstructions, referer, state, csrfToken = "",
-                              loginFunction = loginFetch) {
+        loginFunction = loginFetch) {
         if (!username) {
             throw new Error("Username is null or empty");
         }
@@ -2232,6 +2255,14 @@ class Signum {
 
         if (!loginUrl) {
             throw new Error("loginUrl is null or empty");
+        }
+
+        const invalidLoginUrl = validate.single(loginUrl, { url: { allowLocal: true } });
+
+        if (invalidLoginUrl) {
+            throw new Error(
+                `Bad loginUrl: ${loginUrl} ${JSON.stringify(invalidLoginUrl)}`
+            );
         }
 
         if (!serverInstructions) {
@@ -2246,7 +2277,7 @@ class Signum {
             throw new Error("state is null or empty");
         }
 
-        const invalidServerInstructions = validate(serverInstructions, loginConstraints, {format: "flat"});
+        const invalidServerInstructions = validate(serverInstructions, loginConstraints, { format: "flat" });
 
         if (invalidServerInstructions) {
             throw new Error(
@@ -2281,7 +2312,7 @@ class Signum {
         });
     }
 
-      static normalizePassphrase(passphrase, serverInstructions) {
+    static normalizePassphrase(passphrase, serverInstructions) {
         if (!passphrase) {
             throw new Error("Passphrase is null or empty");
         }
@@ -2290,7 +2321,7 @@ class Signum {
             throw new Error("serverInstructions is null or empty");
         }
 
-        const invalidServerInstructions = validate(serverInstructions, passwordToleranConstraints, {format: "flat"});
+        const invalidServerInstructions = validate(serverInstructions, passwordToleranceConstraints, { format: "flat" });
 
         if (invalidServerInstructions) {
             throw new Error(
@@ -2298,12 +2329,45 @@ class Signum {
             );
         }
 
-        if(serverInstructions.normalizers && passphrase.length >= serverInstructions.passphraseMinimalLength) {
+        if (serverInstructions.normalizers && passphrase.length >= serverInstructions.passphraseMinimalLength) {
             passphrase = new PasswordTolerance(passphrase, serverInstructions.normalizers).normalize();
         }
 
         return passphrase;
     }
+
+    static async hashPasstext(passtext, serverInstructions, username = "") {
+        let salt = "";
+
+        if (!passtext) {
+            throw new Error("Passtext is null or empty");
+        }
+
+        if (!serverInstructions) {
+            throw new Error("serverInstructions is null or empty");
+        }
+
+        const invalidServerInstructions = validate(serverInstructions, passwordHashingConstraints, { format: "flat" });
+
+        if (invalidServerInstructions) {
+            throw new Error(
+                `Bad serverInstructions: ${JSON.stringify(invalidServerInstructions)}`
+            );
+        }
+
+        if(serverInstructions.saltHashByUsername) {
+            const invalidUsername = validate.single(username, { presence : {allowEmpty: false}, type: "string"});
+            if (invalidUsername) {
+                throw new Error(
+                    `Bad Username: Username ${JSON.stringify(invalidUsername)}`
+                );
+            }
+            salt = username;
+        }
+
+        return await pdkf2(passtext, salt, serverInstructions.hashCycles, serverInstructions.resultLength / 2);
+    }
+
 }
 
 exports.Signum = Signum;
@@ -2319,28 +2383,41 @@ const dateFormat = require("dateformat");
 const hexToBinary = require('hex-to-binary');
 
 async function getPublicIp() {
-    return new Promise((resolve, reject)=>{
+    return new Promise((resolve, reject) => {
         fetch("https://api.ipify.org")
-        .then((response) => {
-            if (response.ok) {
-                resolve(response.text());
-            } else {
-                reject('Failed to fetch ip address');
-            }
-        });
+            .then((response) => {
+                if (response.ok) {
+                    resolve(response.text());
+                } else {
+                    reject('Failed to fetch ip address');
+                }
+            });
     });
 }
 
 async function loginFetch(loginUrl, details) {
-    return new Promise((resolve, reject)=>{
+    return new Promise((resolve, reject) => {
         fetch(loginUrl, details)
-        .then((response) => {
-            if (response.ok) {
-                resolve(response.json());
-            } else {
-                reject('Failed to fetch login');
-            }
-        });
+            .then((response) => {
+                if (response.ok) {
+                    resolve(response.json());
+                } else {
+                    reject('Failed to fetch login');
+                }
+            });
+    });
+}
+
+async function pdkf2(password, salt, iterations, keylen) {
+    return new Promise((resolve, reject) => {
+        crypto.pbkdf2(
+            password,
+            salt,
+            iterations,
+            keylen,
+            'sha512',
+            (err, derivedKey) => (err ? reject(err) : resolve(derivedKey.toString('hex')))
+        );
     });
 }
 
@@ -2361,7 +2438,7 @@ async function generateHashCash(zeroCount, serverString) {
         const randomString = btoa((Math.floor(Math.random() * Number.MAX_VALUE) + 1).toString());
         let counter = 0;
 
-        while (counter <  Number.MAX_VALUE - 1) {
+        while (counter < Number.MAX_VALUE - 1) {
             header = `${zeroCount}:${timestamp}:${ipAddress}:${serverString}:${randomString}:${btoa(counter.toString())}`;
 
             const hexHash = crypto.createHash('sha1').update(header).digest('hex').toString();
@@ -2386,6 +2463,7 @@ async function generateHashCash(zeroCount, serverString) {
 exports.generateHashCash = generateHashCash;
 exports.getPublicIp = getPublicIp;
 exports.loginFetch = loginFetch;
+exports.pdkf2 = pdkf2;
 }).call(this,require("buffer").Buffer)
 },{"buffer":55,"cross-fetch":1,"crypto":63,"dateformat":2,"hex-to-binary":3}],9:[function(require,module,exports){
 var asn1 = exports;
