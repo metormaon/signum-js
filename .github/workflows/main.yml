@@ -1,5 +1,3 @@
-# This is a basic workflow to help you get started with Actions
-
 name: CI
 
 # Controls when the action will run. Triggers the workflow on push or pull request
@@ -17,11 +15,26 @@ jobs:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
 
-    #- name: Installing Jasmine
-    #  run: npm install jasmine
-
-    - name: Installing modules
+    - name: Install modules
       run: npm install
 
-    - name: Running tests
+    - name: Run tests
       run: npm test
+      
+    - name: Package code
+      run: |
+        mkdir -p js
+        mkdir -p tmp
+        sudo npm install -g browserify uglify-es
+        browserify src/signum.js -o js/signum-bundle.js --standalone signum
+        uglifyjs js/signum-bundle.js -o js/signum-bundle.min.js --source-map "filename='js/signum-bundle.min.js.map',url='signum-bundle.min.js.map'"
+        rm -r tmp
+
+    - name: Commit minified files
+      uses: stefanzweifel/git-auto-commit-action@v4.1.6      
+      with:
+        repository: .
+        file_pattern: js/*
+        commit_message: "Github Action: Auto Minified JS and CSS files"
+        branch: ${{ github.ref }}
+        
