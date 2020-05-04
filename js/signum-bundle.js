@@ -2238,8 +2238,8 @@ exports.passwordHashingConstraints = passwordHashingConstraints;
 "use strict";
 
 const validate = require("validate.js");
-const { PasswordTolerance } = require("./passwordTolerance");
 const { loginFetch, generateHashCash, pdkf2 } = require("./utils");
+const { PasswordTolerance } = require("./passwordTolerance");
 const { loginConstraints, passwordToleranceConstraints, passwordHashingConstraints } = require("./serverInstructions");
 
 class Signum {
