@@ -13,9 +13,12 @@
     "dateformat": "^3.0.3",
     "hex-to-binary": "^1.0.1",
     "jasmine": "^3.5.0",
-    "validate.js": "^0.13.1"
+    "selenium-webdriver": "^4.0.0-alpha.7",
+    "validate.js": "^0.13.1",
+    "chromedriver": "^81.0.0"
   },
   "scripts": {
+    "preinstall": "npm i -g chromedriver",
     "test": "jasmine test/*-tests.js"
   }
 }

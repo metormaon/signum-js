@@ -30,6 +30,9 @@ jobs:
         uglifyjs js/signum-bundle.js -o js/signum-bundle.min.js --source-map "filename='js/signum-bundle.min.js.map',url='signum-bundle.min.js.map'"
         rm -r tmp
 
+    - name: Test on Broeser
+      run: npm test browser/*-tests.js
+
     - name: Commit minified files
       uses: stefanzweifel/git-auto-commit-action@v4.1.6      
       with:
