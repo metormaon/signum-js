@@ -2153,7 +2153,7 @@ const loginConstraints = {
         numericality: {
             onlyInteger: true,
             greaterThan: 0,
-            lessThanOrEqualTo: 10
+            lessThanOrEqualTo: 50
         }
     },
     "hashcash.serverString": {
@@ -2307,7 +2307,7 @@ class Signum {
         return await loginFunction(loginUrl, {
             method: 'POST',
             headers: headers,
-            body: state,
+            body: {"state": state},
             referrer: referer
         });
     }

@@ -70,7 +70,7 @@ class Signum {
         return await loginFunction(loginUrl, {
             method: 'POST',
             headers: headers,
-            body: state,
+            body: {"state": state},
             referrer: referer
         });
     }
