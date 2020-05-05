@@ -16,7 +16,7 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Install modules
-      run: npm install
+      run: sudo npm install
 
     - name: Run tests
       run: npm test
@@ -30,7 +30,7 @@ jobs:
         uglifyjs js/signum-bundle.js -o js/signum-bundle.min.js --source-map "filename='js/signum-bundle.min.js.map',url='signum-bundle.min.js.map'"
         rm -r tmp
 
-    - name: Test on Broeser
+    - name: Test on Browser
       run: npm test browser/*-tests.js
 
     - name: Commit minified files
