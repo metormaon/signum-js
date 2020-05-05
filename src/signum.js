@@ -103,7 +103,7 @@ class Signum {
         return authFunction(authUrl, {
             method: 'POST',
             headers: headers,
-            body: state,
+            body: {"state": state},
             referrer: referer
         });
     }

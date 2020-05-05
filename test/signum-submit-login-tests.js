@@ -1,6 +1,17 @@
 const {Signum} = require('../src/signum.js');
 
 describe("submitLogin", function() {
+    let originalTimeout;
+
+    beforeEach(function() {
+        originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
+        jasmine.DEFAULT_TIMEOUT_INTERVAL = 60000;
+    });
+
+    afterEach(function() {
+        jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
+    });
+
     it("should fail without username", async function () {
         await expectAsync(
             Signum.executeLogin()
@@ -74,7 +85,7 @@ describe("submitLogin", function() {
         {value: 1.2, error: "must be an integer"},
         {value: -1, error: "must be greater than 0"},
         {value: 0, error: "must be greater than 0"},
-        {value: 60, error: "must be less than or equal to 10"}
+        {value: 60, error: "must be less than or equal to 50"}
     ];
 
     for (const {value, error} of scenarios) {
@@ -189,7 +200,7 @@ describe("submitLogin", function() {
             'X-hashed-Passtext': "3b640263b35f52c731f0",
             'X-captcha': "apple"
         },
-        body: "state",
+        body: {state: 'state'},
         referrer: "referer"
     };
 

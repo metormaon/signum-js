@@ -74,7 +74,7 @@ describe("signup", function() {
         {value: 1.2, error: "must be an integer"},
         {value: -1, error: "must be greater than 0"},
         {value: 0, error: "must be greater than 0"},
-        {value: 60, error: "must be less than or equal to 10"}
+        {value: 60, error: "must be less than or equal to 50"}
     ];
 
     for (const {value, error} of scenarios) {
@@ -189,7 +189,7 @@ describe("signup", function() {
             'X-hashed-Passtext': "3b640263b35f52c731f0",
             'X-captcha': "apple"
         },
-        body: "state",
+        body: {state: 'state'},
         referrer: "referer"
     };
 
