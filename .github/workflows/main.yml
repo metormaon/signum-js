@@ -31,7 +31,10 @@ jobs:
         rm -r tmp
 
     - name: Test on Browser
-      run: npm test browser/*-tests.js
+      run: |
+        wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+        sudo apt install ./google-chrome-stable_current_amd64.deb
+        npm test browser/*-tests.js
 
     - name: Commit minified files
       uses: stefanzweifel/git-auto-commit-action@v4.1.6      
