@@ -40,19 +40,13 @@ describe("signup", function() {
     it("should fail without signupUrl", async function () {
         await expectAsync(
             Signum.executeSignup("joe", "sdf57fs7", "apple")
-        ).toBeRejectedWithError("signupUrl is null or empty");
+        ).toBeRejectedWithError("authUrl is null or empty");
     });
 
     it("should fail with empty signupUrl", async function () {
         await expectAsync(
             Signum.executeSignup("joe", "sdf57fs7", "apple")
-        ).toBeRejectedWithError("signupUrl is null or empty");
-    });
-
-    it("should fail with bad signupUrl", async function () {
-        await expectAsync(
-            Signum.executeSignup("joe", "sdf57fs7", "apple", "zubzubzubzub")
-        ).toBeRejectedWithError("Bad signupUrl: zubzubzubzub [\"is not a valid url\"]");
+        ).toBeRejectedWithError("authUrl is null or empty");
     });
 
     it("should fail without serverInstructions", async function () {
@@ -252,10 +246,10 @@ describe("signup", function() {
                 zeroCount: 1,
                 serverString: "hello world"
             },
-             csrfToken: {
+            csrfToken: {
                 require: true
             },
-             tolerance: {
+            tolerance: {
                 passphraseMinimalLength: 20
             },
             hashing: {

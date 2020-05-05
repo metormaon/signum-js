@@ -3,12 +3,43 @@
 const validate = require("validate.js");
 const { fetchUrl, generateHashCash, pdkf2 } = require("./utils");
 const { PasswordTolerance } = require("./passwordTolerance");
-const { loginConstraints, passwordToleranceConstraints, passwordHashingConstraints, signupConstraints } = require("./serverInstructions");
+const { authenticationConstraints , passwordToleranceConstraints, passwordHashingConstraints } = require("./serverInstructions");
 
 class Signum {
 
-    static async executeSignup(username, passtext, captcha, signupUrl, serverInstructions, referer, state, csrfToken = "",
+    static async executeLogin(username, passtext, captcha, loginUrl, serverInstructions, referer, state, csrfToken = "",
+        loginFunction = fetchUrl) {
+
+        return await this.processAuthentication(username,
+            passtext,
+            captcha,
+            loginUrl,
+            serverInstructions,
+            referer,
+            state,
+            csrfToken,
+            loginFunction,
+            false);
+    }
+
+     static async executeSignup(username, passtext, captcha, signupUrl, serverInstructions, referer, state, csrfToken = "",
         signupFunction = fetchUrl) {
+
+         return await this.processAuthentication(username,
+             passtext,
+             captcha,
+             signupUrl,
+             serverInstructions,
+             referer,
+             state,
+             csrfToken,
+             signupFunction,
+             true);
+     }
+
+    static async processAuthentication(username, passtext, captcha, authUrl, serverInstructions, referer, state, csrfToken = "",
+        authFunction = fetchUrl, isSignupAuth = false) {
+
         if (!username) {
             throw new Error("Username is null or empty");
         }
@@ -21,16 +52,8 @@ class Signum {
             throw new Error("captcha is null or empty");
         }
 
-        if (!signupUrl) {
-            throw new Error("signupUrl is null or empty");
-        }
-
-        const invalidSignupUrl = validate.single(signupUrl, { url: { allowLocal: true } });
-
-        if (invalidSignupUrl) {
-            throw new Error(
-                `Bad signupUrl: ${signupUrl} ${JSON.stringify(invalidSignupUrl)}`
-            );
+        if (!authUrl) {
+            throw new Error("authUrl is null or empty");
         }
 
         if (!serverInstructions) {
@@ -45,7 +68,7 @@ class Signum {
             throw new Error("state is null or empty");
         }
 
-        const invalidServerInstructions = validate(serverInstructions, signupConstraints, { format: "flat" });
+        const invalidServerInstructions = validate(serverInstructions, authenticationConstraints, { format: "flat" });
 
         if (invalidServerInstructions) {
             throw new Error(
@@ -53,7 +76,7 @@ class Signum {
             );
         }
 
-        // TODO: check strength password 
+        // TODO: check strength password if isSignupAuth = true
         const tolerancePassword = this.normalizePassphrase(passtext, serverInstructions.tolerance);
         const hashedPasstext = await this.hashPasstext(tolerancePassword, serverInstructions.hashing, username);
 
@@ -77,7 +100,7 @@ class Signum {
             headers['X-Csrf-Token'] = csrfToken;
         }
 
-        return await signupFunction(signupUrl, {
+        return authFunction(authUrl, {
             method: 'POST',
             headers: headers,
             body: state,
@@ -85,75 +108,6 @@ class Signum {
         });
     }
 
-
-    static async executeLogin(username, hashedPasstext, loginUrl, serverInstructions, referer, state, csrfToken = "",
-        loginFunction = fetchUrl) {
-        if (!username) {
-            throw new Error("Username is null or empty");
-        }
-
-        if (!hashedPasstext) {
-            throw new Error("Passtext is null or empty");
-        }
-
-        if (!loginUrl) {
-            throw new Error("loginUrl is null or empty");
-        }
-
-        const invalidLoginUrl = validate.single(loginUrl, { url: { allowLocal: true } });
-
-        if (invalidLoginUrl) {
-            throw new Error(
-                `Bad loginUrl: ${loginUrl} ${JSON.stringify(invalidLoginUrl)}`
-            );
-        }
-
-        if (!serverInstructions) {
-            throw new Error("serverInstructions is null or empty");
-        }
-
-        if (!referer) {
-            throw new Error("referer is null or empty");
-        }
-
-        if (!state) {
-            throw new Error("state is null or empty");
-        }
-
-        const invalidServerInstructions = validate(serverInstructions, loginConstraints, { format: "flat" });
-
-        if (invalidServerInstructions) {
-            throw new Error(
-                `Bad serverInstructions: ${JSON.stringify(invalidServerInstructions)}`
-            );
-        }
-
-        const headers = {
-            'Content-Type': 'application/json;charset=utf-8',
-            'X-Username': username,
-            'X-hashed-Passtext': hashedPasstext
-        };
-
-        if (serverInstructions.hashcash && serverInstructions.hashcash.require) {
-            headers['X-Hashcash'] = await generateHashCash(serverInstructions.hashcash.zeroCount,
-                serverInstructions.hashcash.serverString);
-        }
-
-        if (serverInstructions.csrfToken && serverInstructions.csrfToken.require) {
-            if (!csrfToken) {
-                throw new Error("csrfToken is null or empty");
-            }
-
-            headers['X-Csrf-Token'] = csrfToken;
-        }
-
-        return await loginFunction(loginUrl, {
-            method: 'POST',
-            headers: headers,
-            body: state,
-            referrer: referer
-        });
-    }
 
     static normalizePassphrase(passphrase, serverInstructions) {
         if (!passphrase) {
