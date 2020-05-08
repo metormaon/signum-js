@@ -16,7 +16,7 @@ describe("hashPasstext", function () {
     it("should fail without serverInstructions", async function () {
         await expectAsync(
             Signum.hashPasstext("sdf57fs7")
-        ).toBeRejectedWithError("serverInstructions is null or empty");
+        ).toBeRejectedWithError("hashing serverInstructions is null or empty");
     });
 
 

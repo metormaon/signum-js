@@ -1,4 +1,4 @@
-const loginConstraints = {
+const authenticationConstraints = {
     hashcash: {
         presence: false
     },
@@ -68,7 +68,6 @@ const passwordToleranceConstraints = {
     }
 };
 
-
 const passwordHashingConstraints = {
     hashCycles: {
         presence: true,
@@ -92,6 +91,6 @@ const passwordHashingConstraints = {
 };
 
 
-exports.loginConstraints = loginConstraints;
+exports.authenticationConstraints = authenticationConstraints;
 exports.passwordToleranceConstraints = passwordToleranceConstraints;
 exports.passwordHashingConstraints = passwordHashingConstraints;
