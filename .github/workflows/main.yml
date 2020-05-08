@@ -19,7 +19,7 @@ jobs:
       run: sudo npm install
 
     - name: Run tests
-      run: npm test
+      run: npm test test/*-tests.js
       
     - name: Package code
       run: |

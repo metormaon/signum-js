@@ -19,6 +19,6 @@
   },
   "scripts": {
     "preinstall": "npm i -g chromedriver",
-    "test": "jasmine test/*-tests.js"
+    "test": "jasmine"
   }
 }

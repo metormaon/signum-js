@@ -3,9 +3,13 @@
     <head>
         <meta charset="UTF-8">
         <!--suppress HtmlUnknownTarget -->
-        <script type="module" src="../js/signum-bundle.min.js"></script>
-        <script src="./js/signum-bundle.min.js">
-            window.executeLogin = function() {Signum.executeLogin();};
+        <script type="module" src="/js/signum-bundle.min.js"></script>
+        <script type="module">
+            import { Signum } from '/js/signum-bundle.min.js';
+
+            console.log("!!!!!!!!!!!!!!!!!!!!!!");
+            window.executeLogin = function() {Signum.executeLogin()};
+            //global.executeLogin = function() {Signum.executeLogin();};
         </script>
         <title>Test</title>
     </head>
