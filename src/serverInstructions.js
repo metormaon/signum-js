@@ -31,6 +31,15 @@ const authenticationConstraints = {
             return attribute && attribute.csrfToken;
         },
         type: "boolean"
+    },
+    captcha: {
+        presence: false
+    },
+    "captcha.require": {
+        presence: function (value, attribute) {
+            return attribute && attribute.captcha;
+        },
+        type: "boolean"
     }
 };
 
