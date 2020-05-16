@@ -62,9 +62,7 @@ async function generateHashCash(zeroCount, serverString) {
         while (counter < Number.MAX_VALUE - 1) {
             header = `${zeroCount}:${timestamp}:${ipAddress}:${serverString}:${randomString}:${btoa(counter.toString())}`;
 
-            const hexHash = crypto.createHash('sha1').update(header).digest('hex').toString();
-
-            binaryHash = hexToBinary(hexHash);
+            const binaryHash = stringToBinaryHash(header);
 
             if (binaryHash.startsWith("0".repeat(zeroCount))) {
                 found = true;
@@ -81,7 +79,18 @@ async function generateHashCash(zeroCount, serverString) {
     return header;
 }
 
+function stringToBinaryHash(str) {
+    console.log(str);
+    const hexHash = crypto.createHash('sha1').update(str).digest('hex');
+    console.log(hexHash);
+    const hexHashString = hexHash.toString();
+    console.log(hexHashString);
+
+    return hexToBinary(hexHashString);
+}
+
 exports.generateHashCash = generateHashCash;
+exports.stringToBinaryHash = stringToBinaryHash;
 exports.getPublicIp = getPublicIp;
 exports.fetchUrl = fetchUrl;
 exports.pdkf2 = pdkf2;

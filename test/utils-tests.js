@@ -1,4 +1,4 @@
-const {getPublicIp, generateHashCash} = require("../src/utils");
+const {getPublicIp, generateHashCash, stringToBinaryHash} = require("../src/utils");
 const hexToBinary = require('hex-to-binary');
 const crypto = require("crypto");
 
@@ -60,3 +60,13 @@ describe("generateHashCash", function () {
         jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
     });
 });
+
+describe("stringToBinaryHash", function () {
+    it("should ", function () {
+        expect(stringToBinaryHash(
+            "15:20200516-184239:82.81.223.44:G5V-uz1mchswi07fqx0QumL8LO0:MS4zMzczODkzNzkyNzY0MDM0ZSszMDc=:MjIwMQ==")
+        ).toEqual("00000000000000011110001100001010011001010111001011111010010111101010111001101011010" +
+            "00010111000111010110001010111100011000001101010110100001010001001100111110111");
+    });
+});
+
