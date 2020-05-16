@@ -218,7 +218,7 @@ describe("signup", function() {
             'X-Username': "joe",
             'X-hashed-Passtext': "3b640263b35f52c731f0",
         },
-        body: {state: 'state'},
+        body: "{\"state\":\"state\"}",
         referrer: "referer"
     };
 
