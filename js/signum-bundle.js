@@ -2470,12 +2470,8 @@ function btoa(input) {
 async function generateHashCash(zeroCount, serverString) {
     const ipAddress = await getPublicIp();
 
-    const now = new Date();
-
-    const now_utc =  new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours(),
-        now.getUTCMinutes(), now.getUTCSeconds()));
-
-    const timestamp = dateFormat(now_utc, "yyyymmdd-HHMMss");
+    const timestamp = new Date().toISOString().replace(/-/g,"")
+        .replace("T", "-").replace(/:/g, "").slice(0, -5);
 
     let header = "";
     let found = false;
