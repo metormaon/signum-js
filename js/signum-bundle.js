@@ -2169,6 +2169,15 @@ const authenticationConstraints = {
             return attribute && attribute.csrfToken;
         },
         type: "boolean"
+    },
+    captcha: {
+        presence: false
+    },
+    "captcha.require": {
+        presence: function (value, attribute) {
+            return attribute && attribute.captcha;
+        },
+        type: "boolean"
     }
 };
 
@@ -2239,42 +2248,40 @@ exports.passwordHashingConstraints = passwordHashingConstraints;
 const validate = require("validate.js");
 const { fetchUrl, generateHashCash, pdkf2 } = require("./utils");
 const { PasswordTolerance } = require("./passwordTolerance");
-const { authenticationConstraints , passwordToleranceConstraints, passwordHashingConstraints } = require("./serverInstructions");
+const { authenticationConstraints, passwordToleranceConstraints, passwordHashingConstraints } = require("./serverInstructions");
 
 class Signum {
 
-    static async executeLogin(username, passtext, captcha, loginUrl, serverInstructions, referer, state, csrfToken = "",
+    static async executeLogin(username, passtext, loginUrl, serverInstructions, referer, state, captcha = "", csrfToken = "",
         loginFunction = fetchUrl) {
 
         return await this.processAuthentication(username,
             passtext,
-            captcha,
             loginUrl,
             serverInstructions,
             referer,
             state,
+            captcha,
             csrfToken,
-            loginFunction,
-            false);
+            loginFunction);
     }
 
-     static async executeSignup(username, passtext, captcha, signupUrl, serverInstructions, referer, state, csrfToken = "",
+    static async executeSignup(username, passtext, signupUrl, serverInstructions, referer, state, captcha = "", csrfToken = "",
         signupFunction = fetchUrl) {
 
-         return await this.processAuthentication(username,
-             passtext,
-             captcha,
-             signupUrl,
-             serverInstructions,
-             referer,
-             state,
-             csrfToken,
-             signupFunction,
-             true);
-     }
+        return await this.processAuthentication(username,
+            passtext,
+            signupUrl,
+            serverInstructions,
+            referer,
+            state,
+            captcha,
+            csrfToken,
+            signupFunction);
+    }
 
-    static async processAuthentication(username, passtext, captcha, authUrl, serverInstructions, referer, state, csrfToken = "",
-        authFunction = fetchUrl, isSignupAuth = false) {
+    static async processAuthentication(username, passtext, authUrl, serverInstructions, referer, state, captcha = "", csrfToken = "",
+        authFunction = fetchUrl) {
 
         if (!username) {
             throw new Error("Username is null or empty");
@@ -2282,10 +2289,6 @@ class Signum {
 
         if (!passtext) {
             throw new Error("Passtext is null or empty");
-        }
-
-        if (!captcha) {
-            throw new Error("captcha is null or empty");
         }
 
         if (!authUrl) {
@@ -2312,7 +2315,6 @@ class Signum {
             );
         }
 
-        // TODO: check strength password if isSignupAuth = true
         const tolerancePassword = this.normalizePassphrase(passtext, serverInstructions.tolerance);
         const hashedPasstext = await this.hashPasstext(tolerancePassword, serverInstructions.hashing, username);
 
@@ -2320,12 +2322,19 @@ class Signum {
             'Content-Type': 'application/json;charset=utf-8',
             'X-Username': username,
             'X-hashed-Passtext': hashedPasstext,
-            'X-captcha': captcha
         };
 
         if (serverInstructions.hashcash && serverInstructions.hashcash.require) {
             headers['X-Hashcash'] = await generateHashCash(serverInstructions.hashcash.zeroCount,
                 serverInstructions.hashcash.serverString);
+        }
+
+        if (serverInstructions.captcha && serverInstructions.captcha.require) {
+            if (!captcha) {
+                throw new Error("captcha is null or empty");
+            }
+
+            headers['X-captcha'] = captcha;
         }
 
         if (serverInstructions.csrfToken && serverInstructions.csrfToken.require) {
@@ -2339,7 +2348,7 @@ class Signum {
         return authFunction(authUrl, {
             method: 'POST',
             headers: headers,
-            body: {"state": state},
+            body: { "state": state },
             referrer: referer
         });
     }
@@ -30355,6 +30364,7 @@ function fn5 (a, b, c, d, e, m, k, s) {
 module.exports = RIPEMD160
 
 },{"buffer":72,"hash-base":112,"inherits":142}],187:[function(require,module,exports){
+/*! safe-buffer. MIT License. Feross Aboukhadijeh <https://feross.org/opensource> */
 /* eslint-disable node/no-deprecated-api */
 var buffer = require('buffer')
 var Buffer = buffer.Buffer
