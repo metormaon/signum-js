@@ -2348,7 +2348,7 @@ class Signum {
         return authFunction(authUrl, {
             method: 'POST',
             headers: headers,
-            body: { "state": state },
+            body: JSON.stringify({ "state": state }),
             referrer: referer
         });
     }
