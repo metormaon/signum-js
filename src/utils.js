@@ -80,11 +80,8 @@ async function generateHashCash(zeroCount, serverString) {
 }
 
 function stringToBinaryHash(str) {
-    console.log(str);
     const hexHash = crypto.createHash('sha1').update(str).digest('hex');
-    console.log(hexHash);
     const hexHashString = hexHash.toString();
-    console.log(hexHashString);
 
     return hexToBinary(hexHashString);
 }
