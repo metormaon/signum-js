@@ -68,7 +68,7 @@ const passwordToleranceConstraints = {
         presence: false,
         type: "boolean"
     },
-    passphraseMinimalLength: {
+    minimumAlphabetPassphrase: {
         presence: true,
         numericality: {
             onlyInteger: true,
@@ -99,7 +99,18 @@ const passwordHashingConstraints = {
     }
 };
 
+const passtextStrengthConstraints = {
+    minimumCharactersPassword: {
+        presence: true,
+        numericality: {
+            onlyInteger: true,
+            greaterThanOrEqualTo: 8
+        }
+    }
+}
+
 
 exports.authenticationConstraints = authenticationConstraints;
 exports.passwordToleranceConstraints = passwordToleranceConstraints;
 exports.passwordHashingConstraints = passwordHashingConstraints;
+exports.passtextStrengthConstraints = passtextStrengthConstraints;

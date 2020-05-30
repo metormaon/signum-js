@@ -157,7 +157,7 @@ describe("signup", function() {
      it("should fail without hashing serverInstructions", async function () {
         const serverInstructions = {
              tolerance: {
-                passphraseMinimalLength: 20
+                minimumAlphabetPassphrase: 20
             }
         };
 
@@ -173,7 +173,7 @@ describe("signup", function() {
                 require: true
             },
             tolerance: {
-                passphraseMinimalLength: 20
+                minimumAlphabetPassphrase: 20
             },
             hashing: {
                 hashCycles: 3,
@@ -193,7 +193,7 @@ describe("signup", function() {
                 require: true
             },
             tolerance: {
-                passphraseMinimalLength: 20
+                minimumAlphabetPassphrase: 20
             },
             hashing: {
                 hashCycles: 3,
@@ -226,7 +226,7 @@ describe("signup", function() {
     it("should signup right without additional policies", async function() {
         const serverInstructions = {
             tolerance: {
-                passphraseMinimalLength: 20
+                minimumAlphabetPassphrase: 20
             },
             hashing: {
                 hashCycles: 3,
@@ -249,7 +249,7 @@ describe("signup", function() {
                 serverString: "hello world"
             },
             tolerance: {
-                passphraseMinimalLength: 20
+                minimumAlphabetPassphrase: 20
             },
             hashing: {
                 hashCycles: 3,
@@ -279,7 +279,7 @@ describe("signup", function() {
                 require: true
             },
             tolerance: {
-                passphraseMinimalLength: 20
+                minimumAlphabetPassphrase: 20
             },
             hashing: {
                 hashCycles: 3,
@@ -315,7 +315,7 @@ describe("signup", function() {
                 require: true
             },
             tolerance: {
-                passphraseMinimalLength: 20
+                minimumAlphabetPassphrase: 20
             },
             hashing: {
                 hashCycles: 3,
