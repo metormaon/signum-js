@@ -19,31 +19,31 @@ describe("normalizePassphrase", function () {
         }).toThrowError("tolerance serverInstructions is null or empty");
     });
 
-    it("should fail missing minimal length", function () {
+    it("should fail minimum alphabet passphrase", function () {
         const serverInstructions = {
         };
 
         expect(function () {
             Signum.normalizePassphrase("sdf57fs7", serverInstructions)
-        }).toThrowError("Bad serverInstructions: [\"Passphrase minimal length can't be blank\"]");
+        }).toThrowError("Bad serverInstructions: [\"Minimum alphabet passphrase can't be blank\"]");
     });
 
-    const scenariosPassphraseMinimalLength = [
+    const scenariosMinimumAlphabetPassphrase = [
         { value: "Josh", error: "is not a number" },
         { value: 1.2, error: "must be an integer" },
         { value: 15, error: "must be greater than or equal to 20" },
     ];
 
-    for (const { value, error } of scenariosPassphraseMinimalLength) {
-        it(`should fail because minimalLength ${error}`, function () {
+    for (const { value, error } of scenariosMinimumAlphabetPassphrase) {
+        it(`should fail because minimumAlphabetPassphrase ${error}`, function () {
 
             const serverInstructions = {
-                passphraseMinimalLength: value
+                minimumAlphabetPassphrase: value
             };
 
             expect(function () {
                 Signum.normalizePassphrase("sdf57fs7", serverInstructions)
-            }).toThrowError(`Bad serverInstructions: [\"Passphrase minimal length ${error}\"]`);
+            }).toThrowError(`Bad serverInstructions: [\"Minimum alphabet passphrase ${error}\"]`);
         });
     }
 
@@ -52,7 +52,7 @@ describe("normalizePassphrase", function () {
             normalizers: {
                 trim: 1
             },
-            passphraseMinimalLength: 20
+            minimumAlphabetPassphrase: 20
         };
 
         expect(function () {
@@ -62,7 +62,7 @@ describe("normalizePassphrase", function () {
 
     it("should not change the passphrase", function () {
         const serverInstructions = {
-            passphraseMinimalLength: 20
+            minimumAlphabetPassphrase: 20
         };
 
         expect(
@@ -72,7 +72,7 @@ describe("normalizePassphrase", function () {
 
     it("should not change the passphrase", function () {
         const serverInstructions = {
-            passphraseMinimalLength: 21,
+            minimumAlphabetPassphrase: 21,
             normalizers: {   
             }
         };
@@ -113,7 +113,7 @@ describe("normalizePassphrase", function () {
     for (const { value, expected } of scenariosNoramalizers) {
         it(`should return ${expected}`, function () {
             const serverInstructions = {
-                passphraseMinimalLength: 20,
+                minimumAlphabetPassphrase: 20,
                 normalizers: value
             };
 

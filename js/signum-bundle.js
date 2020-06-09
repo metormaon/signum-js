@@ -2206,7 +2206,7 @@ const passwordToleranceConstraints = {
         presence: false,
         type: "boolean"
     },
-    passphraseMinimalLength: {
+    minimumAlphabetPassphrase: {
         presence: true,
         numericality: {
             onlyInteger: true,
@@ -2237,10 +2237,21 @@ const passwordHashingConstraints = {
     }
 };
 
+const passtextStrengthConstraints = {
+    minimumCharactersPassword: {
+        presence: true,
+        numericality: {
+            onlyInteger: true,
+            greaterThanOrEqualTo: 8
+        }
+    }
+}
+
 
 exports.authenticationConstraints = authenticationConstraints;
 exports.passwordToleranceConstraints = passwordToleranceConstraints;
 exports.passwordHashingConstraints = passwordHashingConstraints;
+exports.passtextStrengthConstraints = passtextStrengthConstraints;
 },{}],7:[function(require,module,exports){
 (function (global){
 "use strict";
@@ -2248,7 +2259,7 @@ exports.passwordHashingConstraints = passwordHashingConstraints;
 const validate = require("validate.js");
 const { fetchUrl, generateHashCash, pdkf2 } = require("./utils");
 const { PasswordTolerance } = require("./passwordTolerance");
-const { authenticationConstraints, passwordToleranceConstraints, passwordHashingConstraints } = require("./serverInstructions");
+const { authenticationConstraints, passwordToleranceConstraints, passwordHashingConstraints, passtextStrengthConstraints } = require("./serverInstructions");
 
 class Signum {
 
@@ -2353,7 +2364,6 @@ class Signum {
         });
     }
 
-
     static normalizePassphrase(passphrase, serverInstructions) {
         if (!passphrase) {
             throw new Error("Passphrase is null or empty");
@@ -2371,7 +2381,9 @@ class Signum {
             );
         }
 
-        if (serverInstructions.normalizers && passphrase.length >= serverInstructions.passphraseMinimalLength) {
+        const passphraseRegex = new RegExp(`(?:[a-zA-Z].*){${serverInstructions.minimumAlphabetPassphrase},}`);
+
+        if (serverInstructions.normalizers && passphraseRegex.test(passphrase)) {
             passphrase = new PasswordTolerance(passphrase, serverInstructions.normalizers).normalize();
         }
 
@@ -2410,6 +2422,63 @@ class Signum {
         return await pdkf2(passtext, salt, serverInstructions.hashCycles, serverInstructions.resultLength / 2);
     }
 
+    static passtextStrength(passtext, passtextStrengthServerInstructions, toleranceServerInstructions) {
+        const passtextStrength = { VERY_WEAK: 1, WEAK: 2, ALMOST_STRONG: 3, STRONG: 4, VERY_STRONG: 5 };
+
+        let stength = passtextStrength.VERY_WEAK;
+
+        if (!passtext) {
+            throw new Error("Passtext is null or empty");
+        }
+
+        if (!passtextStrengthServerInstructions) {
+            throw new Error("passtext strength serverInstructions is null or empty");
+        }
+
+        const invalidServerInstructions = validate(passtextStrengthServerInstructions, passtextStrengthConstraints, { format: "flat" });
+
+        if (invalidServerInstructions) {
+            throw new Error(
+                `Bad serverInstructions: ${JSON.stringify(invalidServerInstructions)}`
+            );
+        }
+
+        const tolerancePassword = this.normalizePassphrase(passtext, toleranceServerInstructions);
+
+        const minimumAlphabetPassphrase = toleranceServerInstructions.minimumAlphabetPassphrase;
+        const minimumCharactersPassword = passtextStrengthServerInstructions.minimumCharactersPassword;
+
+        // passphrase -> minimum alphabet characters after normalization
+        const passphraseRegex = new RegExp(`(?:[a-zA-Z].*){${minimumAlphabetPassphrase},}`);
+
+        // minimum characters
+        const badPasswordRegex = new RegExp(`(?=.{${minimumCharactersPassword},}).*`);
+
+        // alpha numeric plus minimum characters
+        const goodPasswordRegex = new RegExp(`^(?=\\S*?[a-zA-Z])(?=\\S*?[0-9])\\S{${minimumCharactersPassword},}$`);
+
+        // must contain at least one upper case letter, one lower case letter and (one digit OR one special char)
+        const betterPasswordRegex = new RegExp(`^(?=\\S*?[A-Z])(?=\\S*?[a-z])((?=\\S*?[0-9])|(?=\\S*?[^\\w\\*]))\\S{${minimumCharactersPassword},}$`);
+
+        // must contain at least one upper case letter, one lower case letter and (one digit AND one special char)
+        const bestPasswordRegex = new RegExp(`^(?=\\S*?[A-Z])(?=\\S*?[a-z])(?=\\S*?[0-9])(?=\\S*?[^\\w\\*])\\S{${minimumCharactersPassword},}$`);
+
+        if (passphraseRegex.test(tolerancePassword)) {
+            stength = passtextStrength.VERY_STRONG;
+        } else if(bestPasswordRegex.test(tolerancePassword)) {
+            stength = passtextStrength.VERY_STRONG;
+        } else if(betterPasswordRegex.test(tolerancePassword)) {
+            stength = passtextStrength.STRONG;
+        } else if(goodPasswordRegex.test(tolerancePassword)) {
+            stength = passtextStrength.ALMOST_STRONG;
+        } else if(badPasswordRegex.test(tolerancePassword)) {
+            stength = passtextStrength.WEAK;
+        } else {
+            stength = passtextStrength.VERY_WEAK;
+        }
+
+        return stength;
+    }
 }
 
 exports.Signum = Signum;
@@ -7222,7 +7291,13 @@ PEMEncoder.prototype.encode = function encode(data, options) {
     } else if (cmp > 0) {
       r.isub(this.p);
     } else {
-      r.strip();
+      if (r.strip !== undefined) {
+        // r is BN v4 instance
+        r.strip();
+      } else {
+        // r is BN v5 instance
+        r._strip();
+      }
     }
 
     return r;
@@ -10906,7 +10981,13 @@ function fromByteArray (uint8) {
     } else if (cmp > 0) {
       r.isub(this.p);
     } else {
-      r._strip();
+      if (r.strip !== undefined) {
+        // r is a BN v4 instance
+        r.strip();
+      } else {
+        // r is a BN v5 instance
+        r._strip();
+      }
     }
 
     return r;
@@ -12934,7 +13015,7 @@ module.exports={
 }
 
 },{}],53:[function(require,module,exports){
-var Buffer = require('buffer').Buffer
+var Buffer = require('safe-buffer').Buffer
 var createHash = require('create-hash')
 var stream = require('readable-stream')
 var inherits = require('inherits')
@@ -13027,9 +13108,9 @@ module.exports = {
   createVerify: createVerify
 }
 
-},{"./algorithms.json":51,"./sign":54,"./verify":55,"buffer":72,"create-hash":77,"inherits":142,"readable-stream":70}],54:[function(require,module,exports){
+},{"./algorithms.json":51,"./sign":54,"./verify":55,"create-hash":77,"inherits":142,"readable-stream":70,"safe-buffer":187}],54:[function(require,module,exports){
 // much of this based on https://github.com/indutny/self-signed/blob/gh-pages/lib/rsa.js
-var Buffer = require('buffer').Buffer
+var Buffer = require('safe-buffer').Buffer
 var createHmac = require('create-hmac')
 var crt = require('browserify-rsa')
 var EC = require('elliptic').ec
@@ -13172,9 +13253,9 @@ module.exports = sign
 module.exports.getKey = getKey
 module.exports.makeKey = makeKey
 
-},{"./curves.json":52,"bn.js":25,"browserify-rsa":48,"buffer":72,"create-hmac":79,"elliptic":93,"parse-asn1":154}],55:[function(require,module,exports){
+},{"./curves.json":52,"bn.js":25,"browserify-rsa":48,"create-hmac":79,"elliptic":93,"parse-asn1":154,"safe-buffer":187}],55:[function(require,module,exports){
 // much of this based on https://github.com/indutny/self-signed/blob/gh-pages/lib/rsa.js
-var Buffer = require('buffer').Buffer
+var Buffer = require('safe-buffer').Buffer
 var BN = require('bn.js')
 var EC = require('elliptic').ec
 var parseKeys = require('parse-asn1')
@@ -13258,7 +13339,7 @@ function checkValue (b, q) {
 
 module.exports = verify
 
-},{"./curves.json":52,"bn.js":25,"buffer":72,"elliptic":93,"parse-asn1":154}],56:[function(require,module,exports){
+},{"./curves.json":52,"bn.js":25,"elliptic":93,"parse-asn1":154,"safe-buffer":187}],56:[function(require,module,exports){
 'use strict';
 
 function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; subClass.__proto__ = superClass; }

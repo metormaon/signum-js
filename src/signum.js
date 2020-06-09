@@ -3,7 +3,7 @@
 const validate = require("validate.js");
 const { fetchUrl, generateHashCash, pdkf2 } = require("./utils");
 const { PasswordTolerance } = require("./passwordTolerance");
-const { authenticationConstraints, passwordToleranceConstraints, passwordHashingConstraints } = require("./serverInstructions");
+const { authenticationConstraints, passwordToleranceConstraints, passwordHashingConstraints, passtextStrengthConstraints } = require("./serverInstructions");
 
 class Signum {
 
@@ -108,7 +108,6 @@ class Signum {
         });
     }
 
-
     static normalizePassphrase(passphrase, serverInstructions) {
         if (!passphrase) {
             throw new Error("Passphrase is null or empty");
@@ -126,7 +125,9 @@ class Signum {
             );
         }
 
-        if (serverInstructions.normalizers && passphrase.length >= serverInstructions.passphraseMinimalLength) {
+        const passphraseRegex = new RegExp(`(?:[a-zA-Z].*){${serverInstructions.minimumAlphabetPassphrase},}`);
+
+        if (serverInstructions.normalizers && passphraseRegex.test(passphrase)) {
             passphrase = new PasswordTolerance(passphrase, serverInstructions.normalizers).normalize();
         }
 
@@ -165,6 +166,63 @@ class Signum {
         return await pdkf2(passtext, salt, serverInstructions.hashCycles, serverInstructions.resultLength / 2);
     }
 
+    static passtextStrength(passtext, passtextStrengthServerInstructions, toleranceServerInstructions) {
+        const passtextStrength = { VERY_WEAK: 1, WEAK: 2, ALMOST_STRONG: 3, STRONG: 4, VERY_STRONG: 5 };
+
+        let stength = passtextStrength.VERY_WEAK;
+
+        if (!passtext) {
+            throw new Error("Passtext is null or empty");
+        }
+
+        if (!passtextStrengthServerInstructions) {
+            throw new Error("passtext strength serverInstructions is null or empty");
+        }
+
+        const invalidServerInstructions = validate(passtextStrengthServerInstructions, passtextStrengthConstraints, { format: "flat" });
+
+        if (invalidServerInstructions) {
+            throw new Error(
+                `Bad serverInstructions: ${JSON.stringify(invalidServerInstructions)}`
+            );
+        }
+
+        const tolerancePassword = this.normalizePassphrase(passtext, toleranceServerInstructions);
+
+        const minimumAlphabetPassphrase = toleranceServerInstructions.minimumAlphabetPassphrase;
+        const minimumCharactersPassword = passtextStrengthServerInstructions.minimumCharactersPassword;
+
+        // passphrase -> minimum alphabet characters after normalization
+        const passphraseRegex = new RegExp(`(?:[a-zA-Z].*){${minimumAlphabetPassphrase},}`);
+
+        // minimum characters
+        const badPasswordRegex = new RegExp(`(?=.{${minimumCharactersPassword},}).*`);
+
+        // alpha numeric plus minimum characters
+        const goodPasswordRegex = new RegExp(`^(?=\\S*?[a-zA-Z])(?=\\S*?[0-9])\\S{${minimumCharactersPassword},}$`);
+
+        // must contain at least one upper case letter, one lower case letter and (one digit OR one special char)
+        const betterPasswordRegex = new RegExp(`^(?=\\S*?[A-Z])(?=\\S*?[a-z])((?=\\S*?[0-9])|(?=\\S*?[^\\w\\*]))\\S{${minimumCharactersPassword},}$`);
+
+        // must contain at least one upper case letter, one lower case letter and (one digit AND one special char)
+        const bestPasswordRegex = new RegExp(`^(?=\\S*?[A-Z])(?=\\S*?[a-z])(?=\\S*?[0-9])(?=\\S*?[^\\w\\*])\\S{${minimumCharactersPassword},}$`);
+
+        if (passphraseRegex.test(tolerancePassword)) {
+            stength = passtextStrength.VERY_STRONG;
+        } else if(bestPasswordRegex.test(tolerancePassword)) {
+            stength = passtextStrength.VERY_STRONG;
+        } else if(betterPasswordRegex.test(tolerancePassword)) {
+            stength = passtextStrength.STRONG;
+        } else if(goodPasswordRegex.test(tolerancePassword)) {
+            stength = passtextStrength.ALMOST_STRONG;
+        } else if(badPasswordRegex.test(tolerancePassword)) {
+            stength = passtextStrength.WEAK;
+        } else {
+            stength = passtextStrength.VERY_WEAK;
+        }
+
+        return stength;
+    }
 }
 
 exports.Signum = Signum;
